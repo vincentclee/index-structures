@@ -56,7 +56,7 @@ public class ExtHashMap<K, V> extends AbstractMap<K, V> implements
 
 	/**
 	 * The directory providing access paths to the buckets (buckets in logical
-	 * oder)
+	 * order)
 	 */
 	private final List<Bucket> dir;
 
