@@ -14,6 +14,8 @@ import java.util.*;
 /************************************************************************************
  * This class provides hash maps that use the Linear Hashing algorithm. A hash
  * table is created that is an array of buckets.
+ *
+ * @see https://www.youtube.com/watch?v=Yw1ts57uL7c
  */
 public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 		Serializable, Cloneable, Map<K, V> {
@@ -115,14 +117,8 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	 */
 	public V get(Object key) 
 	{
-	  int i = h(key);
+	  int i = hash(key);
 	  
-	  // if the current index has already been split, use the higher resolution hash
-	  if(i < split)
-	  {
-	    i = h2(key);
-	  }// if
-
 	  // look for key in the ith bucket chain
 	  Bucket potentialBucket = hTable.get(i);
 	  while(potentialBucket != null)
@@ -130,7 +126,7 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	    K[] potentialKey = potentialBucket.key;
 	    
 	    // iterate through this bucket's key array to check for the key
-	    for(int j = 0; j < SLOTS; j++)
+	    for(int j = 0; j < LinHashMap.SLOTS; j++)
 	    {
 	      if(key.equals(potentialKey[j]))
 	      {
@@ -155,12 +151,16 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	 *            the value to insert
 	 * @return null (not the previous value)
 	 */
-	public V put(K key, V value) {
-		int i = h(key);
+	public V put(K key, V value) 
+	{
+	  int i = hash(key);
+	  
+	  this.insert(key, value, i);
+	  
 
-		// TODO: T O B E I M P L E M E N T E D
-
-		return null;
+	  // TODO: T O B E I M P L E M E N T E D
+	  
+	  return null;
 	} // put
 
 	/********************************************************************************
@@ -183,6 +183,66 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 
 		out.println("-------------------------------------------");
 	} // print
+
+	/********************************************************************************
+	 * Insert the given key and value into the bucket chain at the given index of
+	 * the hashtable
+	 *
+	 * @param key the key to insert into the bucket
+	 * @param value the value to insert into the bucket
+	 * @param index the index of the bucket chain to insert the key and value into
+	 */
+	private void insert(K key, V value, int index)
+	{
+	  Bucket insertBucket = hTable.get(index);
+	  
+	  // look for the first spot and insert it
+	  boolean inserted = false;
+	  while(!inserted)
+	  {
+	    // if this bucket has an empty spot, then insert the goods
+	    if(insertBucket.nKeys < LinHashMap.SLOTS)
+	    {
+	      insertBucket.nKeys++;
+	      insertBucket.key[insertBucket.nKeys - 1] = key;
+	      insertBucket.value[insertBucket.nKeys - 1] = value;
+	      inserted = true;
+	    }// if
+	    // if this bucket is full, then move to the next one
+	    else 
+	    {
+	      // if there is no next bucket, then create it
+	      if(insertBucket.next == null)
+	      {
+		Bucket newBucket = new Bucket(null);
+		insertBucket.next = newBucket;
+	      }// if
+
+	      insertBucket = insertBucket.next;
+	    }// else
+	  }// while
+	}// insert
+
+	/********************************************************************************
+	 * Hash the key into the proper index. This method will determine whether to use
+	 * the high or low resolution hash
+	 *
+	 * @param key
+	 *            the key to hash
+	 * @return the location of the bucket chain containing the key-value pair
+	 */
+	private int hash(Object key)
+	{
+	  int i = h(key);
+	  
+	  // if the current index has already been split, use the higher resolution hash
+	  if(i < split)
+	  {
+	    i = h2(key);
+	  }// if
+
+	  return i;
+	}// hash
 
 	/********************************************************************************
 	 * Hash the key using the low resolution hash function.
@@ -229,6 +289,4 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 		out.println("Average number of buckets accessed = " + ht.count
 				/ (double) nKeys);
 	} // main
-
-} // LinHashMap class
-
+} // LinHashMap
