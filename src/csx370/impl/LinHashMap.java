@@ -114,12 +114,29 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	 * 
 	 * @return the set view of the map
 	 */
-	public Set<Map.Entry<K, V>> entrySet() {
-		Set<Map.Entry<K, V>> enSet = new HashSet<>();
+	public Set<Map.Entry<K, V>> entrySet() 
+	{
+	  Set<Map.Entry<K, V>> enSet = new HashSet<>();
+	  
+	  // iterate through hash table to add all pairs
+	  for(int i = 0; i < this.hTable.size(); i++)
+	  {
+	    Bucket bucket = this.hTable.get(i);
+	    
+	    // iterate through the bucket chain at this position in the hash table
+	    while(bucket != null)
+	    {
+	      // iterate through pairs stored in this bucket and place them into the set
+	      for(int j = 0; j < bucket.nKeys; j++)
+	      {
+		enSet.add(new AbstractMap.SimpleEntry<K, V>(bucket.key[j], bucket.value[j]));
+	      }// for
 
-		// TODO: T O B E I M P L E M E N T E D
+	      bucket = bucket.next;
+	    }// while
+	  }// for
 
-		return enSet;
+	  return enSet;
 	} // entrySet
 
 	/********************************************************************************
@@ -228,15 +245,23 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	/********************************************************************************
 	 * Print the hash table.
 	 */
-	private void print() {
-		out.println("Hash Table (Linear Hashing)");
-		out.println("-------------------------------------------");
-
-		// TODO: T O B E I M P L E M E N T E D
-
-		out.println("-------------------------------------------");
+	private void print() 
+	{
+	  out.println("Hash Table (Linear Hashing)");
+	  out.println("-------------------------------------------");
+	  out.println("Key\t->\tValue");
+	  
+	  // iterate through entry set and print each entry
+	  Iterator<Map.Entry<K, V>> itr = this.entrySet().iterator();
+	  while(itr.hasNext())
+	  {
+	    Map.Entry<K, V> entry = itr.next();
+	    out.println(entry.getKey() + "\t->\t" + entry.getValue());
+	  }// while
+	  
+	  out.println("-------------------------------------------");
 	} // print
-
+	
 	/********************************************************************************
 	 * Insert the given key and value into the bucket chain at the given index of
 	 * the hashtable
