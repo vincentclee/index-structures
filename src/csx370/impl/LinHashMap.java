@@ -155,6 +155,8 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	  Bucket potentialBucket = this.hTable.get(i);
 	  while(potentialBucket != null)
 	  {
+	    this.count++;
+
 	    // iterate through this bucket's key array to check for the key
 	    for(int j = 0; j < LinHashMap.SLOTS; j++)
 	    {
@@ -353,7 +355,7 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	 */
 	public static void main(String[] args) {
 	  LinHashMap<Integer, Integer> ht = new LinHashMap<>(Integer.class,
-							     Integer.class, 5);
+							     Integer.class, 11);
 	  int nKeys = 30;
 	  if (args.length == 1)
 	    nKeys = Integer.valueOf(args[0]);
