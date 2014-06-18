@@ -113,12 +113,37 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	 *            the key used for look up
 	 * @return the value associated with the key
 	 */
-	public V get(Object key) {
-		int i = h(key);
+	public V get(Object key) 
+	{
+	  int i = h(key);
+	  
+	  // if the current index has already been split, use the higher resolution hash
+	  if(i < split)
+	  {
+	    i = h2(key);
+	  }// if
 
-		// TODO: T O B E I M P L E M E N T E D
+	  // look for key in the ith bucket chain
+	  Bucket potentialBucket = hTable.get(i);
+	  while(potentialBucket != null)
+	  {
+	    K[] potentialKey = potentialBucket.key;
+	    
+	    // iterate through this bucket's key array to check for the key
+	    for(int j = 0; j < SLOTS; j++)
+	    {
+	      if(key.equals(potentialKey[j]))
+	      {
+		return potentialBucket.value[j];
+	      }// if
+	    }// for
 
-		return null;
+	    // check next bucket in the chain if this one doesn't have the key
+	    potentialBucket = potentialBucket.next;
+	  }// while
+	  
+	  // if for some reason the value is not found, return null
+	  return null;
 	} // get
 
 	/********************************************************************************
