@@ -144,15 +144,32 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	 *            the key used for look up
 	 * @return the value associated with the key or null if key is not present
 	 */
-	public V get(Object key) {
+	public V get(Object key)
+	{
+	  // call private get method that increments count for performance testing
+	  return this.get(key, true);
+	}// get
+
+	/********************************************************************************
+	 * Given the key, look up the value in the hash table.
+	 * 
+	 * @param key
+	 *            the key used for look up
+	 * @param updateCount true to update this.count for performance testing, false otherwise
+	 * @return the value associated with the key or null if key is not present
+	 */
+	private V get(Object key, boolean updateCount) {
 		// get index of hashtable where desired value is stored
 		int i = hash(key);
 
 		// look for key in the ith bucket chain
 		Bucket potentialBucket = hTable.get(i);
 		while (potentialBucket != null) {
-			count++;
-
+		        if(updateCount)
+			{
+			  this.count++;
+			}// if
+			
 			// iterate through this bucket's key array to check for the key
 			for (int j = 0; j < SLOTS; j++) {
 				if (key.equals(potentialBucket.key[j])) {
@@ -178,6 +195,12 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	 * @return null (not the previous value)
 	 */
 	public V put(K key, V value) {
+	        // prevent storage of duplicates, don't increment this.count here
+	        if(value == this.get(key, false))
+		{
+		  return null;
+		}// if
+	    
 		// determine index in hashtable where the value needs to be put
 		int i = hash(key);
 		insert(key, value, i);
