@@ -82,16 +82,33 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 * @return  the set view of the map
 	 */
 	public Set<Map.Entry<K, V>> entrySet() {
-		Set<Map.Entry<K, V>> enSet = new TreeSet<>();
+		Set<Map.Entry<K, V>> enSet = new HashSet<>();
 		
-		//soo night right
-		for (int i = 0; i < root.key.length; i++) {
-//			System.out.print("k:" + root.key[i]);
-//			System.out.println(" v:" + root.ref[i]);
-			enSet.add(new SimpleEntry<K, V>(root.key[i], (V) root.ref[i]));
+		//set the starting node
+		Node node = root;
+		
+		//go to first leaf
+		while (!node.isLeaf) {
+			node = (Node) node.ref[0];
 		}
-//		System.out.println(this.keySet());
-//		System.out.println("size:" + enSet.size());
+		
+		//add entries until full
+		while (enSet.size() != sum) {
+			//don't need this if correctly implemented
+			//if node is null, exit
+			if (node == null) {
+				break;
+			}
+			
+			//iterate through current node
+			for (int i = 0; i < node.nKeys; i++) {
+				enSet.add(new SimpleEntry<K, V>(node.key[i], (V) node.ref[i]));
+			}
+			
+			//get next linked leaf
+			node = (Node) node.ref[ORDER-1];
+		}
+		
 		return enSet;
 	} // entrySet
 	
@@ -121,41 +138,32 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 * @return  the first key in the B+Tree map.
 	 */
 	public K firstKey() {
-		//iterate to the first key
-		for (Map.Entry<K, V> key : entrySet()) {
-			return key.getKey();
+		//checks for first time
+		boolean first = true;
+		
+		//contains smallest value
+		K smallest = null;
+		
+		//loop through whole map
+		for (Map.Entry<K, V> item : entrySet()) {
+			//get key from set
+			K key = item.getKey();
+			
+			//checks if smallest is initialized
+			if (first) {
+				smallest = key;
+				first = false;
+			}
+			//checks whether current key is less than 'smallest'
+			else {
+				if (key.compareTo(smallest) < 0) {
+					smallest = key;
+				}
+			}
 		}
 		
-		//return empty key
-		return null;
-		
-		//OLD STUFF
-//		//checks for first time
-//		boolean first = true;
-//		
-//		//contains smallest value
-//		K smallest = null;
-//		
-//		//loop through whole map
-//		for (Map.Entry<K, V> item : entrySet()) {
-//			//get key from set
-//			K key = item.getKey();
-//			
-//			//checks if smallest is initialized
-//			if (first) {
-//				smallest = key;
-//				first = false;
-//			}
-//			//checks whether current key is less than 'smallest'
-//			else {
-//				if (key.compareTo(smallest) < 0) {
-//					smallest = key;
-//				}
-//			}
-//		}
-//		
-//		//return smallest item
-//		return smallest;
+		//return smallest item
+		return smallest;
 	} // firstKey
 	
 	/********************************************************************************
@@ -163,44 +171,32 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 * @return  the last key in the B+Tree map.
 	 */
 	public K lastKey() {
-		//key temporary storage
-		K k = null;
+		//checks for first time
+		boolean first = true;
 		
-		//Iterate to the last key
-		for (Map.Entry<K, V> key : entrySet()) {
-			k = key.getKey();
+		//contains largest value
+		K largest = null;
+		
+		//loop through whole map
+		for (Map.Entry<K, V> item : entrySet()) {
+			//get key from set
+			K key = item.getKey();
+			
+			//checks if largest is initialized
+			if (first) {
+				largest = key;
+				first = false;
+			}
+			//checks whether current key is less than 'largest'
+			else {
+				if (key.compareTo(largest) > 0) {
+					largest = key;
+				}
+			}
 		}
 		
-		//return last key
-		return k;
-		
-		//OLD STUFF
-//		//checks for first time
-//		boolean first = true;
-//		
-//		//contains largest value
-//		K largest = null;
-//		
-//		//loop through whole map
-//		for (Map.Entry<K, V> item : entrySet()) {
-//			//get key from set
-//			K key = item.getKey();
-//			
-//			//checks if largest is initialized
-//			if (first) {
-//				largest = key;
-//				first = false;
-//			}
-//			//checks whether current key is less than 'largest'
-//			else {
-//				if (key.compareTo(largest) > 0) {
-//					largest = key;
-//				}
-//			}
-//		}
-//		
-//		//return largest item
-//		return largest;
+		//return largest item
+		return largest;
 	} // lastKey
 	
 	/********************************************************************************
@@ -248,28 +244,27 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 */
 	@SuppressWarnings("unchecked")
 	private void print(Node n, int level) {
-//		entrySet();
-		System.out.println("first:" + firstKey());
-//		System.out.println("last:" + lastKey());
-//		System.out.println("size:" + size());
-//		out.println("BpTreeMap");
-//		out.println("-------------------------------------------");
-//		
-//		for (int j = 0; j < level; j++) {
-//			out.print ("\t");
-//		}
-//		out.print ("[ . ");
-//		for (int i = 0; i < n.nKeys; i++) {
-//			out.print(n.key [i] + " . ");
-//		}
-//		out.println ("]");
-//		if (!n.isLeaf) {
-//			for (int i = 0; i <= n.nKeys; i++) {
-//				print((Node) n.ref[i], level + 1);
-//			}
-//		} // if
-//		
-//		out.println ("-------------------------------------------");
+		System.out.println("first:" + firstKey()); //TODO
+		System.out.println("last:" + lastKey()); //TODO
+		System.out.println("size:" + size()); //TODO
+		out.println("BpTreeMap");
+		out.println("-------------------------------------------");
+		
+		for (int j = 0; j < level; j++) {
+			out.print ("\t");
+		}
+		out.print ("[ . ");
+		for (int i = 0; i < n.nKeys; i++) {
+			out.print(n.key [i] + " . ");
+		}
+		out.println ("]");
+		if (!n.isLeaf) {
+			for (int i = 0; i <= n.nKeys; i++) {
+				print((Node) n.ref[i], level + 1);
+			}
+		} // if
+		
+		out.println ("-------------------------------------------");
 	} // print
 	
 	/********************************************************************************
