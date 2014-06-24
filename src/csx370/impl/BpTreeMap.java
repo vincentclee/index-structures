@@ -342,7 +342,24 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 * @param n    the current node
 	 */
 	private Node split(K key, V ref, Node n) {
-		out.println("split not implemented yet");
+       	// Creates a Node for Childe node
+                Node child = new Node(n.isLeaf);
+       // the sibling node should have the same status leaf - non-leaf
+		child.isLeaf= n.isLeaf;
+       // The child has the same number of elements
+		child.nKeys=ORDER;
+      // The upper half of the elements goes to the child
+                int  Half = n.nKeys/2  ;
+                out.print(" Half is : " + Half);
+		for (int i = 0; i < Half ; i++) { 
+			child.key[i]= n.key[i + Half  ];
+			child.ref[i] = n.ref[i + Half ];
+                        n.key[ i + Half - 1]= null;
+                        n.ref[ i+ Half -1] = null;
+                }
+                child.key[Half] = key;
+                child.ref[Half]= ref;		
+		return child;
 		
 		//TODO:  T O   B E   I M P L E M E N T E D
 		
