@@ -342,24 +342,38 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 		sum++;
 		
 		//Do insert
-		V v = (V) n.ref[ORDER -1 ];
+//		V v = (V) n.ref[ORDER -1 ];
 		
-		if (n.nKeys < ORDER - 1) {
+		if (n.isLeaf) {
+			if (n.nKeys < ORDER - 1) {
+				for (int i = 0; i < n.nKeys; i++) {
+					K k_i = n.key[i];
+					if (key.compareTo(k_i) < 0) {
+						wedge(key, ref, n, i);
+					} else if (key.equals (k_i)) {
+						out.println("BpTreeMap:insert: attempt to insert duplicate key = " + key);
+					} // if
+				} // for
+				wedge(key, ref, n, n.nKeys);
+			} else {
+				Node sib = split(key, ref, n);
+				insert(key, ref, sib,n );
+				n.ref[ORDER -1] = sib;
+//				System.out.println("--" + Arrays.toString(n.ref));
+			} // if
+		} else {
 			for (int i = 0; i < n.nKeys; i++) {
 				K k_i = n.key[i];
-				if (key.compareTo(k_i) < 0) {
-					wedge(key, ref, n, i);
-				} else if (key.equals (k_i)) {
-					out.println("BpTreeMap:insert: attempt to insert duplicate key = " + key);
-				} // if
-			} // for
-			wedge(key, ref, n, n.nKeys);
-		} else {
-			Node sib = split(key, ref, n);
-			insert(key, ref, sib,n );
-			n.ref[ORDER -1] = sib;
-//			System.out.println("--" + Arrays.toString(n.ref));
-		} // if
+				if (key.compareTo(k_i) <= 0) {
+					insert(key, ref, (Node) n.ref[i], n);
+					return;
+				}
+			}
+			insert(key, ref, (Node) n.ref[n.nKeys], n);
+			return;
+		}
+		
+		
 	} // insert
 	
 	/********************************************************************************
