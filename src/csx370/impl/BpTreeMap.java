@@ -82,7 +82,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 * @return  the set view of the map
 	 */
 	public Set<Map.Entry<K, V>> entrySet() {
-		Set<Map.Entry<K, V>> enSet = new HashSet<>();
+		Set<Map.Entry<K, V>> enSet = new LinkedHashSet<>();
 		
 		//set the starting node
 		Node node = root;
@@ -288,7 +288,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 		System.out.println("first:" + firstKey()); //TODO
 		System.out.println("last:" + lastKey()); //TODO
 		System.out.println("size:" + size()); //TODO
-		System.out.println(headMap((K) new Integer(7)));
+		System.out.println("entry:" + entrySet());
 		out.println("BpTreeMap");
 		out.println("-------------------------------------------");
 		
@@ -342,6 +342,8 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 		sum++;
 		
 		//Do insert
+		V v = (V) n.ref[ORDER -1 ];
+		
 		if (n.nKeys < ORDER - 1) {
 			for (int i = 0; i < n.nKeys; i++) {
 				K k_i = n.key[i];
@@ -354,10 +356,9 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 			wedge(key, ref, n, n.nKeys);
 		} else {
 			Node sib = split(key, ref, n);
-			//somenthing with the nKeys
-			System.out.println("nKeys" + sib.nKeys);
-			wedge(key, ref, sib,sib.nKeys);
-
+			insert(key, ref, sib,n );
+			n.ref[ORDER -1] = sib;
+//			System.out.println("--" + Arrays.toString(n.ref));
 		} // if
 	} // insert
 	
@@ -388,19 +389,31 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 		// Creates a Node for Childe node
 		Node child = new Node(n.isLeaf);
 		// the sibling node should have the same status leaf - non-leaf
-		child.isLeaf = n.isLeaf;
+//		child.isLeaf = n.isLeaf;
 		// The child has the same number of elements
-		child.nKeys = 1;
+		child.nKeys = 0;
+		
+		Node child1 = new Node(n.isLeaf);
+		child1.nKeys = 0;
+		
 		// The upper half of the elements goes to the child
-		if (child.isLeaf) {
+		if (child1.isLeaf) {
 			int Half = n.nKeys / 2;
 			out.print("Half is : " + Half);
 			for (int i = 0; i < Half; i++) { 
-				wedge(n.key[i+ Half], (V) n.ref[i + Half], child, i);
+				// copying the second child information into the second child
+				wedge(n.key[i+ Half], (V) n.ref[i + Half], child1, i);
+				//copying the first child information into the first
+				wedge(n.key[i], (V) n.ref[i], child,i);
+				child1.key[i+Half] = null;
+//				n.ref[i+Half] = null;
 				n.nKeys--;
 			}
-			wedge(key, ref, child, Half);
-			
+			n.ref[n.nKeys] = child;
+			child.ref[ORDER -1] = child1;
+			wedge(key, ref, child1, Half);
+//			wedge(key, (V) n.ref[n.nKeys], child, Half);
+
 		}
 		else if (!child.isLeaf) {
 			int Half = n.nKeys / 2;
@@ -412,6 +425,11 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 			wedge(key, null, child, Half);
 			
 		}
+//		child.nKeys--;
+		System.out.println();
+		System.out.println(child.nKeys);
+		System.out.println(Arrays.toString(child.key));
+		System.out.println(Arrays.toString(child.ref));
 		return child;
 	} // split
 	
