@@ -27,12 +27,12 @@ public class BpTreeMapTest {
 	SortedMap<Integer,Integer> treeMap;
 	
 	/**
-	 * @throws java.lang.Exception
+	 * hi
 	 */
 	@Before
 	public void setUp() {
 		bpt = new BpTreeMap<>(Integer.class, Integer.class);
-		int toKeys = 8;
+		int toKeys = 9;
 		
 		Random random = new Random();
 		
@@ -41,40 +41,60 @@ public class BpTreeMapTest {
 		treeMap = new TreeMap<Integer,Integer>();
 		
 		
-		for (int i = 0; i < toKeys; i++) {
-			int number = random.nextInt(20);
-			
-			//generate unique 5 digit number
-			while (linkedHashMap.containsKey(number = random.nextInt(20)));
-			
-			linkedHashMap.put(number, number * number);
-			treeMap.put(number, number * number);
+//		for (int i = 0; i < toKeys; i++) {
+//			int number = random.nextInt(20);
+//			
+//			//generate unique 5 digit number
+//			while (linkedHashMap.containsKey(number = random.nextInt(20)));
+//			
+//			linkedHashMap.put(number, number * number);
+//			treeMap.put(number, number * number);
+//		}
+		
+//		System.out.println(linkedHashMap);
+		
+		
+//		for (Map.Entry<Integer, Integer> entry : treeMap.entrySet()) {
+//		    int key = entry.getKey();
+//		    int value = entry.getValue();
+//		    
+//		    bpt.put(key, value);
+//		}
+		for (int i = 1; i < toKeys; i += 2) {
+			bpt.put(i, i * i);
+			treeMap.put(i, i * i);
 		}
 		
-		System.out.println(linkedHashMap);
 		System.out.println(treeMap);
-		
-		
 		
 //		bpt.print(bpt.getRoot(), 0);
 		
-		for (int i = 0; i < toKeys; i++) {
-			out.println("key = " + i + " value = " + bpt.get(i));
-		} // for
+//		for (int i = 0; i < toKeys; i++) {
+//			out.println("key = " + i + " value = " + bpt.get(i));
+//		} // for
 	}
-
+	
+	/**
+	 * the submap with keys in the range [firstKey, toKey)
+	 */
 	@Test
 	public void headMapTest() {
-		bpt.headMap(treeMap.lastKey());
+		assertEquals("headMap", treeMap.headMap(treeMap.lastKey()).toString(), bpt.headMap(treeMap.lastKey()).toString());
 	}
 	
+	/**
+	 * the submap with keys in the range [fromKey, lastKey]
+	 */
 	@Test
 	public void tailMapTest() {
-		bpt.tailMap(treeMap.lastKey());
+		assertEquals("tailMap", treeMap.tailMap(treeMap.firstKey()).toString(), bpt.tailMap(treeMap.firstKey()).toString());
 	}
 	
+	/**
+	 * the submap with keys in the range [fromKey, toKey)
+	 */
 	@Test
 	public void subMapTest() {
-		bpt.subMap(treeMap.firstKey(), treeMap.lastKey());
+		assertEquals("subMap", treeMap.subMap(treeMap.firstKey(), treeMap.lastKey()).toString(), bpt.subMap(treeMap.firstKey(), treeMap.lastKey()).toString());
 	}
 }
