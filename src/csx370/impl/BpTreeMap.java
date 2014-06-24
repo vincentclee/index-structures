@@ -312,8 +312,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 			wedge(key, ref, n, n.nKeys);
 		} else {
 			Node sib = split(key, ref, n);
-//			System.out.println(key);
-			//TODO:  T O   B E   I M P L E M E N T E D
+                        wedge(key, ref, sib,sib.nKeys);
 			
 		} // if
 	} // insert
