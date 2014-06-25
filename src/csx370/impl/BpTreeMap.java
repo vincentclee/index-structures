@@ -21,6 +21,9 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	/** The maximum fanout for a B+Tree node. */
 	private static final int ORDER = 5;
 	
+	/** The FLOOR(maximum fanout / 2) for a B+Tree node. */
+	private static final int HALF = ORDER/2;
+	
 	/** The class for type K. */
 	private final Class <K> classK;
 	
@@ -121,7 +124,6 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 */
 	public V put(K key, V value) {
 		insert(key, value, root, null);
-		out.println("insert--" + key);
 		return null;
 	} // put
 	
@@ -295,6 +297,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 		System.out.println("entry:" + entrySet());
 	}
 	
+	
 	/********************************************************************************
 	 * Print the B+Tree using a pre-order traveral and indenting each level.
 	 * @param n      the current node to print
@@ -302,24 +305,28 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 */
 	@SuppressWarnings("unchecked")
 	private void print(Node n, int level) {
-		out.println("BpTreeMap");
-		out.println("-------------------------------------------");
+		if (level == 0) out.println("BpTreeMap");
+		if (level == 0) out.println("-------------------------------------------");
 		
-		for (int j = 0; j < level; j++) {
-			out.print ("\t");
-		}
-		out.print ("[ . ");
+		out.print(level);
+		
+//		for (int j = 0; j < level; j++) {
+//			out.print("\t");
+//		}
+		out.print("[ . ");
 		for (int i = 0; i < n.nKeys; i++) {
 			out.print(n.key [i] + " . ");
 		}
-		out.println ("]");
+		
+		out.println("]");
+		
 		if (!n.isLeaf) {
 			for (int i = 0; i <= n.nKeys; i++) {
 				print((Node) n.ref[i], level + 1);
 			}
 		} // if
 		
-		out.println ("-------------------------------------------");
+		if (n.isLeaf && n.ref[ORDER - 1] == null) out.println ("-------------------------------------------");
 	} // print
 	
 	/********************************************************************************
@@ -331,8 +338,8 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	private V find(K key, Node n) {
 		count++;
 		for (int i = 0; i < n.nKeys; i++) {
-//			System.out.println(key + " ------ " +n);
 			K k_i = n.key[i];
+//			System.out.println(n);
 			if (key.compareTo(k_i) <= 0) {
 				if (n.isLeaf) {
 					return (key.equals(k_i)) ? (V) n.ref[i] : null;
@@ -343,6 +350,39 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 		} // for
 		return (n.isLeaf) ? null : find (key, (Node) n.ref[n.nKeys]);
 	} // find
+	//i is number of items
+	private void superWedge(K key, V ref, Node n, int size) {
+		//empty Node
+		if (size == 0) {
+			n.key[n.nKeys] = key;
+			n.ref[n.nKeys] = ref;
+			
+			//increment # of keys
+			n.nKeys++;
+		} 
+		//not empty nodes
+		else {
+			//Map to store node key and ref pairs
+			Map<K, V> sortedMap = new TreeMap<K, V>();
+			
+			//Add node current pairs to map
+			for (int i = 0; i < n.nKeys; i++) {
+				sortedMap.put(n.key[i], (V) n.ref[i]);
+			}
+			//Add key and ref to add
+			sortedMap.put(key, ref);
+			
+			//increment # of keys
+			n.nKeys++;
+			
+			/*
+			 * Override values with sorted values
+			 * src, srcPos, dest, destPos, length
+			 */
+			System.arraycopy(sortedMap.keySet().toArray(), 0, n.key, 0, n.nKeys);
+			System.arraycopy(sortedMap.values().toArray(), 0, n.ref, 0, n.nKeys);
+		}
+	} // wedge
 	
 	/********************************************************************************
 	 * Recursive helper function for inserting a key in B+trees.
@@ -352,6 +392,43 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 * @param p    the parent node
 	 */
 	private void insert(K key, V ref, Node n, Node p) {
+		out.println("insert--" + key);
+		
+		//only node
+		if (root.isLeaf) {
+			//empty
+			if (n.nKeys == 0) {
+				System.out.println("empty");
+				superWedge(key, ref, n, 0);
+			}
+			
+			//not full yet
+			else if (n.nKeys < ORDER - 1) {
+				System.out.println("not full");
+				superWedge(key, ref, n, -1);
+			} 
+			//is full
+			else {
+				System.out.println("full");
+				//split the node n to n lined to right
+				Node right = split(key, ref, n);
+				
+				//push up first key of right to new root node
+				root = new Node(false);
+				root.key[0] = right.key[0];
+				root.nKeys++;
+				
+				//link root to n and sib
+				root.ref[0] = n;
+				root.ref[1] = right;
+			}
+		}
+		
+		if (p == null) {
+			return;
+		}
+		
+		
 		if (n.nKeys < ORDER - 1) {
 			for (int i = 0; i < n.nKeys; i++) {
 				K k_i = n.key [i];
@@ -363,13 +440,9 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 			} // for
 			wedge (key, ref, n, n.nKeys);
 		} else {
-			Node sib = split (key, ref, n);
+			Node sib = split(key, ref, n);
 			
 			if (n == root) {
-//				System.out.println("n.key" + Arrays.toString(n.key));
-				System.out.println("sib.key" + Arrays.toString(sib.key));
-				System.out.println("sib.ref" + Arrays.toString(sib.ref));
-				System.out.println("sib.nkeys" + sib.nKeys);
 				//push up first key of sib to new root node
 				root = new Node(false);
 				root.key[0] = sib.key[0];
@@ -386,17 +459,19 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 //				System.out.println(n == root);
 //				System.out.println(root.isLeaf);
 //				
-//				System.out.println(n.isLeaf);
-//				System.out.println(sib.isLeaf);
-//				System.out.println(root.isLeaf);
-//				System.out.println(n.isLeaf);
-//				System.out.println(sib.isLeaf);
-				
+				System.out.println(root.isLeaf);
+				System.out.println(n.isLeaf);
+				System.out.println(sib.isLeaf);
+				System.out.println("root-hash " + root);
 				System.out.println("root" + Arrays.toString(root.key));
 				System.out.println("root" + Arrays.toString(root.ref));
 				Node noder = (Node) root.ref[1];
 				System.out.println("noder" + Arrays.toString(noder.key));
 				System.out.println("noder" + Arrays.toString(noder.ref));
+				
+//				System.out.println(root.nKeys);
+//				System.out.println(n.nKeys);
+//				System.out.println(sib.nKeys);
 			}
 		}
 	} // insert
@@ -425,42 +500,72 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 * @param n    the current node
 	 */
 	private Node split(K key, V ref, Node n) {
-		// Creates a Node for Childe node
-		Node sibling = new Node(n.isLeaf);
-		// the sibling node should have the same status leaf - non-leaf
-		sibling.isLeaf = n.isLeaf;
-		// The child has the same number of elements
-		sibling.nKeys = 0;
-		// The upper half of the elements goes to the child
-		if (sibling.isLeaf) {
-			int Half = n.nKeys / 2;
-			out.print("Half is : " + Half);
-			for (int i = 0; i < Half; i++) {
-				wedge(n.key[i+ Half], (V) n.ref[i + Half], sibling, i);
-				// wedge(n.key[i], (V) n.ref[i],n,i);
-				n.key[i+Half] = null;
-				n.ref[i+Half] = null;
-			}
-			n.nKeys = n.nKeys - Half;
-			wedge(key, ref, sibling, Half);
-			System.out.println(Arrays.toString(n.key));
+		/*
+		 * Node n START
+		 * [3, 5, 7, 9]
+		 * [9, 25, 49, 81, null]
+		 * key = 1
+		 * ref = 1
+		 */
+		
+		//Creates a new right node
+		Node right = new Node(n.isLeaf);
+		
+		//Map to store node key and ref pairs
+		Map<K, V> sortedMap = new TreeMap<K, V>();
+		
+		//Add node current pairs to map
+		for (int i = 0; i < n.nKeys; i++) {
+			sortedMap.put(n.key[i], (V) n.ref[i]);
 		}
-		else if (!sibling.isLeaf) {
-			int Half = n.nKeys / 2;
-			//out.print(" Half is : " + Half);
-			for (int i = 0; i < Half; i++) {
-				wedge(n.key[i+ Half], null, sibling, i);
-				n.nKeys--;
-			}
-			wedge(key, null, sibling, Half);
-
+		//Add key and ref to insert
+		sortedMap.put(key, ref);
+		
+		/*
+		 * Fill with null to 'n'
+		 * a, fromIndex, toIndex, val
+		 * [3, 5, null, null]
+		 * [9, 25, null, null, null]
+		 */
+		Arrays.fill(n.key, HALF, ORDER - 1, null);
+		Arrays.fill(n.ref, HALF, ORDER - 1, null);
+		
+		/*
+		 * Copy over first half to 'n'
+		 * src, srcPos, dest, destPos, length
+		 * [1, 3, null, null]
+		 * [1, 9, null, null, null]
+		 */
+		System.arraycopy(sortedMap.keySet().toArray(), 0, n.key, 0, HALF);
+		System.arraycopy(sortedMap.values().toArray(), 0, n.ref, 0, HALF);
+		n.nKeys = HALF; //set n.nKeys
+		
+		/*
+		 * Copy over rest to 'right'
+		 * src, srcPos, dest, destPos, length
+		 * [5, 7, 9, null]
+		 * [25, 49, 81, null, null]
+		 */
+		System.arraycopy(sortedMap.keySet().toArray(), HALF, right.key, 0, ORDER-HALF);
+		System.arraycopy(sortedMap.values().toArray(), HALF, right.ref, 0, ORDER-HALF);
+		right.nKeys = ORDER-HALF; //set right.nKeys
+		
+		//link n to right
+		if (n.isLeaf && right.isLeaf) {
+			System.out.println("both are leaf");
+			n.ref[ORDER - 1] = right;
 		}
-		// child.nKeys--;
-		System.out.println();
-		System.out.println(sibling.nKeys);
-		System.out.println(Arrays.toString(sibling.key));
-		System.out.println(Arrays.toString(sibling.ref));
-		return sibling;
+		
+//		System.out.println(n);
+//		System.out.println("n" + Arrays.toString(n.key));
+//		System.out.println("n" + Arrays.toString(n.ref));
+//		System.out.println(n.nKeys);
+//		System.out.println(right);
+//		System.out.println("right" + Arrays.toString(right.key));
+//		System.out.println("right" + Arrays.toString(right.ref));
+//		System.out.println(right.nKeys);
+		
+		return right;
 	} // split
 	
 	/********************************************************************************
@@ -474,9 +579,15 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 			totKeys = Integer.valueOf(args[0]);
 		}
 		
-		for (int i = 1; i < totKeys; i += 2) {
-			bpt.put(i, i * i);
-		}
+//		for (int i = 1; i < totKeys; i += 2) {
+//			bpt.put(i, i * i);
+//		}
+		
+		bpt.put(3, 9);
+		bpt.put(7, 49);
+		bpt.put(9, 81);
+		bpt.put(5, 25);
+		bpt.put(1, 1);
 		
 		bpt.debug();
 		bpt.print(bpt.root, 0);
