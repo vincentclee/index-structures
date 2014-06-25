@@ -341,51 +341,73 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	private void insert(K key, V ref, Node n, Node p) {
 		//Increment sum
 		sum++;
-		
-		//Do insert
-//		V v = (V) n.ref[ORDER -1 ];
-		
-//		if (n.isLeaf) {
-			if (n.nKeys < ORDER - 1) {
-				for (int i = 0; i < n.nKeys; i++) {
-					K k_i = n.key[i];
-					if (key.compareTo(k_i) < 0) {
-						wedge(key, ref, n, i);
-					} else if (key.equals (k_i)) {
-						out.println("BpTreeMap:insert: attempt to insert duplicate key = " + key);
-					} // if
-				} // for
-				wedge(key, ref, n, n.nKeys);
-				
-			} else {
-				p.isLeaf=false;
-				p.ref[0]= n;
-				Node sib = split(key, ref, n);
-				p.ref[1]=sib;
-				
-//				System.out.println("p:" +Arrays.toString(p.key));
-				insert(sib.key[0], (V) n.ref[0], sib,p );
-				n.ref[ORDER-1] = sib;
-				System.out.println("root:" +Arrays.toString(p.key));
-				System.out.println(root.isLeaf);
-//				n.ref[ORDER -1] = sib;
-//				System.out.println("--" + Arrays.toString(n.ref));
-			} // if
-			
-			System.out.println(Arrays.toString(n.key));
-//		} else {
-//			for (int i = 0; i < n.nKeys; i++) {
-//				K k_i = n.key[i];
-//				if (key.compareTo(k_i) <= 0) {
-//					insert(key, ref, (Node) n.ref[i], n);
-//					return;
-//				}
-//			}
-//			insert(key, ref, (Node) n.ref[n.nKeys], n);
-//			return;
-//		}
-		
-		
+	if(n.equals(root))
+        {
+            if(n.nKeys ==0)
+            {
+               // put(key,ref);
+                wedge(key,ref,root,root.nKeys);
+                Node child = new Node(true);
+                wedge(key, ref, child,0);
+                root.ref[0]= child;
+            }
+           else if (n.nKeys < ORDER - 1) {
+            for (int i = 0; i < n.nKeys; i++) {
+                K k_i = n.key [i];
+                if (key.compareTo (k_i) < 0) {
+                    wedge (key, ref, n, i);
+                } else if (key.equals (k_i)) {
+                    out.println ("BpTreeMap:insert: attempt to insert duplicate key = " + key);
+                } // if
+            } // for
+            wedge (key, ref, n, n.nKeys);
+        } else {
+            Node sib = split (key, ref, n);
+            insert(key, ref, sib, root);
+            
+
+     //  T O   B E   I M P L E M E N T E D
+
+        } // if
+        } // root insert finished here
+        else 
+        {
+            if(n.isLeaf)
+            {
+                if(n.nKeys < ORDER -1)
+                {
+                for (int i =0 ; i < n.nKeys; i++)
+                {
+                    K k_i = key;
+                    if (n.key[i].compareTo(key)< 0)
+                    {
+                        wedge(key,ref,n,i);
+                        if (key.compareTo(p.key[i])>0 && key.compareTo(p.key[i+1]) <0)
+                        {
+                            p.ref[i]= n;
+                        }
+                        else if ( key.compareTo(p.key[0])< 0)
+                        {
+                            p.ref[0] = n;
+                        }
+                        else 
+                        {
+                            p.ref[i+1]= n;
+                        }
+                    }
+                } // for
+                    
+                  }
+                else 
+                {
+                  Node  sib = split (key, ref, n);
+                  insert(key,ref, sib, p);
+                }
+            }
+        }
+        
+    		
+        	
 	} // insert
 	
 	/********************************************************************************
