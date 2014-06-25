@@ -322,8 +322,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	/********************************************************************************
 	 * The main method used for testing.
 	 * 
-	 * @param the
-	 *            command-line arguments (args [0] gives number of keys to
+	 *            @param args the command-line arguments (args [0] gives number of keys to
 	 *            insert)
 	 */
 	public static void main(String[] args) {
