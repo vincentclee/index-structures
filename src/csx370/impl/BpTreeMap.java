@@ -130,6 +130,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 */
 	public V put(K key, V value) {
 		insert(key, value, root, null);
+		out.println("insert--" + key);
 		return null;
 	} // put
 	
@@ -344,7 +345,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 		//Do insert
 //		V v = (V) n.ref[ORDER -1 ];
 		
-		if (n.isLeaf) {
+//		if (n.isLeaf) {
 			if (n.nKeys < ORDER - 1) {
 				for (int i = 0; i < n.nKeys; i++) {
 					K k_i = n.key[i];
@@ -355,23 +356,34 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 					} // if
 				} // for
 				wedge(key, ref, n, n.nKeys);
+				
 			} else {
+				p.isLeaf=false;
+				p.ref[0]= n;
 				Node sib = split(key, ref, n);
-				insert(key, ref, sib,n );
-				n.ref[ORDER -1] = sib;
+				p.ref[1]=sib;
+				
+//				System.out.println("p:" +Arrays.toString(p.key));
+				insert(sib.key[0], (V) n.ref[0], sib,p );
+				n.ref[ORDER-1] = sib;
+				System.out.println("root:" +Arrays.toString(p.key));
+				System.out.println(root.isLeaf);
+//				n.ref[ORDER -1] = sib;
 //				System.out.println("--" + Arrays.toString(n.ref));
 			} // if
-		} else {
-			for (int i = 0; i < n.nKeys; i++) {
-				K k_i = n.key[i];
-				if (key.compareTo(k_i) <= 0) {
-					insert(key, ref, (Node) n.ref[i], n);
-					return;
-				}
-			}
-			insert(key, ref, (Node) n.ref[n.nKeys], n);
-			return;
-		}
+			
+			System.out.println(Arrays.toString(n.key));
+//		} else {
+//			for (int i = 0; i < n.nKeys; i++) {
+//				K k_i = n.key[i];
+//				if (key.compareTo(k_i) <= 0) {
+//					insert(key, ref, (Node) n.ref[i], n);
+//					return;
+//				}
+//			}
+//			insert(key, ref, (Node) n.ref[n.nKeys], n);
+//			return;
+//		}
 		
 		
 	} // insert
@@ -401,50 +413,41 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 */
 	private Node split(K key, V ref, Node n) {
 		// Creates a Node for Childe node
-		Node child = new Node(n.isLeaf);
+		Node sibling = new Node(n.isLeaf);
 		// the sibling node should have the same status leaf - non-leaf
-//		child.isLeaf = n.isLeaf;
+		sibling.isLeaf = n.isLeaf;
 		// The child has the same number of elements
-		child.nKeys = 0;
-		
-		Node child1 = new Node(n.isLeaf);
-		child1.nKeys = 0;
-		
+		sibling.nKeys = 0;
 		// The upper half of the elements goes to the child
-		if (child1.isLeaf) {
+		if (sibling.isLeaf) {
 			int Half = n.nKeys / 2;
 			out.print("Half is : " + Half);
 			for (int i = 0; i < Half; i++) { 
-				// copying the second child information into the second child
-				wedge(n.key[i+ Half], (V) n.ref[i + Half], child1, i);
-				//copying the first child information into the first
-				wedge(n.key[i], (V) n.ref[i], child,i);
-				child1.key[i+Half] = null;
-//				n.ref[i+Half] = null;
-				n.nKeys--;
+				wedge(n.key[i+ Half], (V) n.ref[i + Half], sibling, i);
+//				wedge(n.key[i], (V) n.ref[i],n,i);
+				n.key[i+Half] = null;
+				n.ref[i+Half] = null;
 			}
-			n.ref[n.nKeys] = child;
-			child.ref[ORDER -1] = child1;
-			wedge(key, ref, child1, Half);
-//			wedge(key, (V) n.ref[n.nKeys], child, Half);
-
+			n.nKeys = n.nKeys - Half;
+			wedge(key, ref, sibling, Half);
+			System.out.println(Arrays.toString(n.key));
 		}
-		else if (!child.isLeaf) {
+		else if (!sibling.isLeaf) {
 			int Half = n.nKeys / 2;
 			//out.print(" Half is : " + Half);
 			for (int i = 0; i < Half; i++) { 
-				wedge(n.key[i+ Half], null, child, i);
+				wedge(n.key[i+ Half], null, sibling, i);
 				n.nKeys--;
 			}
-			wedge(key, null, child, Half);
+			wedge(key, null, sibling, Half);
 			
 		}
-//		child.nKeys--;
+//				child.nKeys--;
 		System.out.println();
-		System.out.println(child.nKeys);
-		System.out.println(Arrays.toString(child.key));
-		System.out.println(Arrays.toString(child.ref));
-		return child;
+		System.out.println(sibling.nKeys);
+		System.out.println(Arrays.toString(sibling.key));
+		System.out.println(Arrays.toString(sibling.ref));
+		return sibling;
 	} // split
 	
 	/********************************************************************************
