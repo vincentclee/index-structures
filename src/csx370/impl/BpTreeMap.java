@@ -350,10 +350,119 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 		} // for
 		return (n.isLeaf) ? null : find (key, (Node) n.ref[n.nKeys]);
 	} // find
-	//i is number of items
-	private void superWedge(K key, V ref, Node n, int size) {
+	
+	/********************************************************************************
+	 * Recursive helper function for inserting a key in B+trees.
+	 * @param key  the key to insert
+	 * @param ref  the value/node to insert
+	 * @param n    the current node
+	 * @param p    the parent node
+	 */
+	private void insert(K key, V ref, Node n, Node p) {
+		out.println("insert--" + key);
+		
+		//only one node
+		if (root.isLeaf) {
+			if (n.nKeys < ORDER - 1) { //empty or not full yet
+				System.out.println("empty or not full");
+				superWedge(key, ref, n);
+			} else { //is full
+				System.out.println("full");
+				
+				//key is a duplicate
+				if (Arrays.stream(n.key).anyMatch(key::equals)) {
+					superWedge(key, ref, n);
+				} else {
+					//split the node n to n lined to right
+					Node right = split(key, ref, n);				
+					
+					//push up first key of right to new root node
+					root = new Node(false);
+					root.key[0] = right.key[0];
+					root.nKeys++;
+					
+					//link root to n and sib
+					root.ref[0] = n;
+					root.ref[1] = right;
+				}
+			}
+		}
+		
+//		if (p == null) {
+//			return;
+//		}
+		
+		
+//		if (n.nKeys < ORDER - 1) {
+//			for (int i = 0; i < n.nKeys; i++) {
+//				K k_i = n.key [i];
+//				if (key.compareTo (k_i) < 0) {
+//					wedge (key, ref, n, i);
+//				} else if (key.equals (k_i)) {
+//					out.println ("BpTreeMap:insert: attempt to insert duplicate key = " + key);
+//				} // if
+//			} // for
+//			wedge (key, ref, n, n.nKeys);
+//		} else {
+//			Node sib = split(key, ref, n);
+//			
+//			if (n == root) {
+//				//push up first key of sib to new root node
+//				root = new Node(false);
+//				root.key[0] = sib.key[0];
+//				root.nKeys++;
+//				
+//				//link root to n and sib
+//				root.ref[0] = n;
+//				root.ref[1] = sib;
+//				
+//				//link n to sib
+//				n.ref[ORDER - 1] = sib;
+//				
+////				System.out.println("n.key" + Arrays.toString(n.key));
+////				System.out.println(n == root);
+////				System.out.println(root.isLeaf);
+////				
+//				System.out.println(root.isLeaf);
+//				System.out.println(n.isLeaf);
+//				System.out.println(sib.isLeaf);
+//				System.out.println("root-hash " + root);
+//				System.out.println("root" + Arrays.toString(root.key));
+//				System.out.println("root" + Arrays.toString(root.ref));
+//				Node noder = (Node) root.ref[1];
+//				System.out.println("noder" + Arrays.toString(noder.key));
+//				System.out.println("noder" + Arrays.toString(noder.ref));
+				
+//				System.out.println(root.nKeys);
+//				System.out.println(n.nKeys);
+//				System.out.println(sib.nKeys);
+				
+				
+				
+//				System.out.println("ROOT");
+//				System.out.println(root);
+//				System.out.println(Arrays.toString(root.key));
+//				System.out.println(Arrays.toString(root.ref));
+//				System.out.println(n);
+//				System.out.println(Arrays.toString(n.key));
+//				System.out.println(Arrays.toString(n.ref));
+//				System.out.println(right);
+//				System.out.println(Arrays.toString(right.key));
+//				System.out.println(Arrays.toString(right.ref));
+				
+//			}
+//		}
+	} // insert
+	
+	/********************************************************************************
+	 * Wedge the key-ref pair into node n.
+	 * @param key  the key to insert
+	 * @param ref  the value/node to insert
+	 * @param n    the current node
+	 */
+	private void superWedge(K key, V ref, Node n) {
 		//empty Node
-		if (size == 0) {
+		if (n.nKeys == 0) {
 			n.key[n.nKeys] = key;
 			n.ref[n.nKeys] = ref;
 			
@@ -372,8 +481,8 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 			//Add key and ref to add
 			sortedMap.put(key, ref);
 			
-			//increment # of keys
-			n.nKeys++;
+			//set # of keys
+			n.nKeys = sortedMap.size();
 			
 			/*
 			 * Override values with sorted values
@@ -382,99 +491,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 			System.arraycopy(sortedMap.keySet().toArray(), 0, n.key, 0, n.nKeys);
 			System.arraycopy(sortedMap.values().toArray(), 0, n.ref, 0, n.nKeys);
 		}
-	} // wedge
-	
-	/********************************************************************************
-	 * Recursive helper function for inserting a key in B+trees.
-	 * @param key  the key to insert
-	 * @param ref  the value/node to insert
-	 * @param n    the current node
-	 * @param p    the parent node
-	 */
-	private void insert(K key, V ref, Node n, Node p) {
-		out.println("insert--" + key);
-		
-		//only node
-		if (root.isLeaf) {
-			//empty
-			if (n.nKeys == 0) {
-				System.out.println("empty");
-				superWedge(key, ref, n, 0);
-			}
-			
-			//not full yet
-			else if (n.nKeys < ORDER - 1) {
-				System.out.println("not full");
-				superWedge(key, ref, n, -1);
-			} 
-			//is full
-			else {
-				System.out.println("full");
-				//split the node n to n lined to right
-				Node right = split(key, ref, n);
-				
-				//push up first key of right to new root node
-				root = new Node(false);
-				root.key[0] = right.key[0];
-				root.nKeys++;
-				
-				//link root to n and sib
-				root.ref[0] = n;
-				root.ref[1] = right;
-			}
-		}
-		
-		if (p == null) {
-			return;
-		}
-		
-		
-		if (n.nKeys < ORDER - 1) {
-			for (int i = 0; i < n.nKeys; i++) {
-				K k_i = n.key [i];
-				if (key.compareTo (k_i) < 0) {
-					wedge (key, ref, n, i);
-				} else if (key.equals (k_i)) {
-					out.println ("BpTreeMap:insert: attempt to insert duplicate key = " + key);
-				} // if
-			} // for
-			wedge (key, ref, n, n.nKeys);
-		} else {
-			Node sib = split(key, ref, n);
-			
-			if (n == root) {
-				//push up first key of sib to new root node
-				root = new Node(false);
-				root.key[0] = sib.key[0];
-				root.nKeys++;
-				
-				//link root to n and sib
-				root.ref[0] = n;
-				root.ref[1] = sib;
-				
-				//link n to sib
-				n.ref[ORDER - 1] = sib;
-				
-//				System.out.println("n.key" + Arrays.toString(n.key));
-//				System.out.println(n == root);
-//				System.out.println(root.isLeaf);
-//				
-				System.out.println(root.isLeaf);
-				System.out.println(n.isLeaf);
-				System.out.println(sib.isLeaf);
-				System.out.println("root-hash " + root);
-				System.out.println("root" + Arrays.toString(root.key));
-				System.out.println("root" + Arrays.toString(root.ref));
-				Node noder = (Node) root.ref[1];
-				System.out.println("noder" + Arrays.toString(noder.key));
-				System.out.println("noder" + Arrays.toString(noder.ref));
-				
-//				System.out.println(root.nKeys);
-//				System.out.println(n.nKeys);
-//				System.out.println(sib.nKeys);
-			}
-		}
-	} // insert
+	} // superWedge
 	
 	/********************************************************************************
 	 * Wedge the key-ref pair into node n.
@@ -588,6 +605,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 		bpt.put(9, 81);
 		bpt.put(5, 25);
 		bpt.put(1, 1);
+//		bpt.put(7, 40);
 		
 		bpt.debug();
 		bpt.print(bpt.root, 0);
