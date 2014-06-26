@@ -8,7 +8,9 @@ package csx370.impl;
 
 import java.io.*;
 import java.lang.reflect.Array;
+
 import static java.lang.System.out;
+
 import java.util.*;
 
 /************************************************************************************
@@ -113,7 +115,38 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 */
 	@SuppressWarnings("unchecked")
 	public V get(Object key) {
-		return find((K) key, root);
+		//correctly type key
+		K keyy = (K) key;
+		
+		//set the starting node
+		Node node = root;
+		
+		//find the value
+		for (int i = 0; i < node.nKeys; i++) {
+			//node is a leaf
+			if (node.isLeaf) {
+				//match
+				if (keyy.compareTo(node.key[i]) == 0) {
+					return (V) node.ref[i];
+				} else if (keyy.compareTo(node.key[i]) < 0) { //key is less than node's current value
+					return null;
+				} continue;
+			}
+			
+			//greater than or equal -> go right
+			if (keyy.compareTo(node.key[i]) >= 0) {
+				node = (Node) node.ref[i+1];
+				i = -1;
+			} else if (i == 0 && keyy.compareTo(node.key[i]) < 0) { //less than first key -> go left
+				node = (Node) node.ref[i];
+				i = -1;
+			} else if (i > 0 && keyy.compareTo(node.key[i-1]) > 0 && keyy.compareTo(node.key[i]) < 0) { //in between i-1 & i -> go left
+				node = (Node) node.ref[i];
+				i = -1;
+			}
+		}
+		
+		return null;
 	} // get
 	
 	/********************************************************************************
@@ -339,7 +372,6 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 		count++;
 		for (int i = 0; i < n.nKeys; i++) {
 			K k_i = n.key[i];
-//			System.out.println(n);
 			if (key.compareTo(k_i) <= 0) {
 				if (n.isLeaf) {
 					return (key.equals(k_i)) ? (V) n.ref[i] : null;
@@ -352,7 +384,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	} // find
 	
 	/********************************************************************************
-	 * Recursive helper function for inserting a key in B+trees.
+	 * Non-Recursive helper function for inserting a key in B+trees.
 	 * @param key  the key to insert
 	 * @param ref  the value/node to insert
 	 * @param n    the current node
@@ -363,104 +395,116 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 		
 		//only one node
 		if (root.isLeaf) {
-			if (n.nKeys < ORDER - 1) { //empty or not full yet
-				System.out.println("empty or not full");
-				superWedge(key, ref, n);
+			//empty or not full yet
+			if (n.nKeys < ORDER - 1) {
+//				System.out.println("empty or not full");
+				wedge(key, ref, n, 0);
 			} else { //is full
-				System.out.println("full");
+//				System.out.println("full");
 				
 				//key is a duplicate
 				if (Arrays.stream(n.key).anyMatch(key::equals)) {
-					superWedge(key, ref, n);
-				} else {
-					//split the node n to n lined to right
-					Node right = split(key, ref, n);				
+					wedge(key, ref, n, 0);
+				} else { //not duplicate
+					//split the node n
+					Node right = split(key, ref, n);
 					
 					//push up first key of right to new root node
 					root = new Node(false);
 					root.key[0] = right.key[0];
 					root.nKeys++;
 					
-					//link root to n and sib
+					//link root to n and right
 					root.ref[0] = n;
 					root.ref[1] = right;
 				}
 			}
+		} else { //more than one node
+			//keep track of path through tree
+			Stack<Node> stack = new Stack<Node>();
+			
+			//find leaf to insert on
+			Node node = locate(key, stack);
+			
+			System.out.println(stack);
+			
+			//empty or not full yet
+			if (node.nKeys < ORDER - 1) {
+				wedge(key, ref, node, 0);
+			} else { //is full
+				//key is a duplicate
+				if (Arrays.stream(node.key).anyMatch(key::equals)) {
+					wedge(key, ref, node, 0);
+				} else {
+					//split the node n
+					Node right = split(key, ref, node);
+					
+//					System.out.println("right" + Arrays.toString(right.key));
+					
+					//push up first key of right to parent node
+					Node parent = stack.pop();
+					
+					//link parent to right
+//					wedge(right.key[0], (V) right, parent, 1);
+					
+					System.out.println("rooter5: " + Arrays.toString(root.key));
+					System.out.println("rooter5" + Arrays.toString(root.ref));
+					System.out.println(right);
+//					stack.pop().
+//					root = new Node(false);
+//					root.key[0] = right.key[0];
+//					root.nKeys++;
+					
+					
+//					root.ref[0] = n;
+//					root.ref[1] = right;
+				}
+			}
+		}
+	} // insert
+	
+	/********************************************************************************
+	 * Non-Recursive helper function for locating tuple where insertion will occur
+	 * @param key  the key to insert
+	 * @param ref  the value/node to insert
+	 * @param n    the current node
+	 * @param p    the parent node
+	 */
+	private Node locate(K key, Stack<Node> stack) {
+		//set the starting node
+		Node node = root;
+		
+		//find the value
+		for (int i = 0; i < node.nKeys; i++) {
+			if (node.isLeaf) { //node is a leaf
+				return node;
+			} else if (key.compareTo(node.key[i]) >= 0) { //greater than or equal -> go right
+				stack.push(node); //adds parent to stack
+				node = (Node) node.ref[i+1];
+				i = -1;
+			} else if (i == 0 && key.compareTo(node.key[i]) < 0) { //less than first key -> go left
+				stack.push(node); //adds parent to stack
+				node = (Node) node.ref[i];
+				i = -1;
+			} else if (i > 0 && key.compareTo(node.key[i-1]) > 0 && key.compareTo(node.key[i]) < 0) { //in between i-1 & i -> go left
+				stack.push(node); //adds parent to stack
+				node = (Node) node.ref[i];
+				i = -1;
+			}
 		}
 		
-//		if (p == null) {
-//			return;
-//		}
-		
-		
-//		if (n.nKeys < ORDER - 1) {
-//			for (int i = 0; i < n.nKeys; i++) {
-//				K k_i = n.key [i];
-//				if (key.compareTo (k_i) < 0) {
-//					wedge (key, ref, n, i);
-//				} else if (key.equals (k_i)) {
-//					out.println ("BpTreeMap:insert: attempt to insert duplicate key = " + key);
-//				} // if
-//			} // for
-//			wedge (key, ref, n, n.nKeys);
-//		} else {
-//			Node sib = split(key, ref, n);
-//			
-//			if (n == root) {
-//				//push up first key of sib to new root node
-//				root = new Node(false);
-//				root.key[0] = sib.key[0];
-//				root.nKeys++;
-//				
-//				//link root to n and sib
-//				root.ref[0] = n;
-//				root.ref[1] = sib;
-//				
-//				//link n to sib
-//				n.ref[ORDER - 1] = sib;
-//				
-////				System.out.println("n.key" + Arrays.toString(n.key));
-////				System.out.println(n == root);
-////				System.out.println(root.isLeaf);
-////				
-//				System.out.println(root.isLeaf);
-//				System.out.println(n.isLeaf);
-//				System.out.println(sib.isLeaf);
-//				System.out.println("root-hash " + root);
-//				System.out.println("root" + Arrays.toString(root.key));
-//				System.out.println("root" + Arrays.toString(root.ref));
-//				Node noder = (Node) root.ref[1];
-//				System.out.println("noder" + Arrays.toString(noder.key));
-//				System.out.println("noder" + Arrays.toString(noder.ref));
-				
-//				System.out.println(root.nKeys);
-//				System.out.println(n.nKeys);
-//				System.out.println(sib.nKeys);
-				
-				
-				
-//				System.out.println("ROOT");
-//				System.out.println(root);
-//				System.out.println(Arrays.toString(root.key));
-//				System.out.println(Arrays.toString(root.ref));
-//				System.out.println(n);
-//				System.out.println(Arrays.toString(n.key));
-//				System.out.println(Arrays.toString(n.ref));
-//				System.out.println(right);
-//				System.out.println(Arrays.toString(right.key));
-//				System.out.println(Arrays.toString(right.ref));
-				
-//			}
-//		}
-	} // insert
+		//not really possible
+		return null;
+	} // locate
 	
 	/********************************************************************************
 	 * Wedge the key-ref pair into node n.
 	 * @param key  the key to insert
 	 * @param ref  the value/node to insert
 	 * @param n    the current node
+	 * @param i    the insertion position offset within node n
 	 */
-	private void superWedge(K key, V ref, Node n) {
+	private void wedge(K key, V ref, Node n, int i) {
 		//empty Node
 		if (n.nKeys == 0) {
 			n.key[n.nKeys] = key;
@@ -475,12 +519,12 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 			Map<K, V> sortedMap = new TreeMap<K, V>();
 			
 			//Add node current pairs to map
-			for (int i = 0; i < n.nKeys; i++) {
-				sortedMap.put(n.key[i], (V) n.ref[i]);
+			for (int j = 0; j < n.nKeys; j++) {
+				sortedMap.put(n.key[j], (V) n.ref[j]);
 			}
 			//Add key and ref to add
 			sortedMap.put(key, ref);
-			
+			System.out.println(sortedMap);
 			//set # of keys
 			n.nKeys = sortedMap.size();
 			
@@ -491,23 +535,6 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 			System.arraycopy(sortedMap.keySet().toArray(), 0, n.key, 0, n.nKeys);
 			System.arraycopy(sortedMap.values().toArray(), 0, n.ref, 0, n.nKeys);
 		}
-	} // superWedge
-	
-	/********************************************************************************
-	 * Wedge the key-ref pair into node n.
-	 * @param key  the key to insert
-	 * @param ref  the value/node to insert
-	 * @param n    the current node
-	 * @param i    the insertion position within node n
-	 */
-	private void wedge(K key, V ref, Node n, int i) {
-		for (int j = n.nKeys; j > i; j--) {
-			n.key[j] = n.key[j - 1];
-			n.ref[j] = n.ref[j - 1];
-		} // for
-		n.key[i] = key;
-		n.ref[i] = ref;
-		n.nKeys++;
 	} // wedge
 	
 	/********************************************************************************
@@ -605,14 +632,19 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 		bpt.put(9, 81);
 		bpt.put(5, 25);
 		bpt.put(1, 1);
-//		bpt.put(7, 40);
+		bpt.put(11, 121);
+//		bpt.put(13, 169);
 		
 		bpt.debug();
 		bpt.print(bpt.root, 0);
 		
-		for (int i = 0; i < totKeys; i++) {
+		for (int i = 0; i < 20; i++) {
 			out.println("key = " + i + " value = " + bpt.get(i));
 		} // for
+		
+//		for (int i = 0; i < totKeys; i++) {
+//			out.println("key = " + i + " value = " + bpt.get(i));
+//		} // for
 		
 		out.println("-------------------------------------------");
 		out.println("Average number of nodes accessed = " + bpt.count / (double) totKeys);
