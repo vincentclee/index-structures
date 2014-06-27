@@ -1,13 +1,7 @@
-/**
- * hi
- */
 package csx370.test;
 
-import static java.lang.System.out;
 import static org.junit.Assert.*;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -18,65 +12,37 @@ import org.junit.Test;
 import csx370.impl.BpTreeMap;
 
 /**
- * hi
- *
+ * This class provides tests for the B+ Tree data stricture
  */
 public class BpTreeMapTest {
-	BpTreeMap<Integer, Integer> bpt;
-//	Map<Integer,Integer> linkedHashMap;
-	SortedMap<Integer,Integer> treeMap;
+	private BpTreeMap<Integer, Integer> bpt;
+	private SortedMap<Integer,Integer> treeMap;
 	
 	/**
-	 * hi
+	 * Provides setup by generating random numbers for testing
 	 */
 	@Before
 	public void setUp() {
 		bpt = new BpTreeMap<>(Integer.class, Integer.class);
-		int toKeys = 20;
-		
-		Random random = new Random();
-		
-		
-//		linkedHashMap = new LinkedHashMap<Integer,Integer>();
 		treeMap = new TreeMap<Integer,Integer>();
 		
+		//random generator
+		Random random = new Random();
 		
+		//number of non-unique items
+		int toKeys = 100;
+		
+		//generate
 		for (int i = 0; i < toKeys; i++) {
-			int number = random.nextInt(20);
+			int number = random.nextInt(1000);
 			
-			//generate unique 5 digit number
-//			while (linkedHashMap.containsKey(number = random.nextInt(20)));
-			
-//			linkedHashMap.put(number, number * number);
 			treeMap.put(number, number * number);
 			bpt.put(number, number * number);
 		}
-//		
-//		System.out.println(linkedHashMap);
-		
-		
-//		for (Map.Entry<Integer, Integer> entry : treeMap.entrySet()) {
-//		    int key = entry.getKey();
-//		    int value = entry.getValue();
-//		    
-//		    bpt.put(key, value);
-//		}
-//		for (int i = 1; i < toKeys; i += 2) {
-//			bpt.put(i, i * i);
-//			treeMap.put(i, i * i);
-//		}
-		
-		System.out.println(treeMap);
-		
-//		bpt.print(bpt.getRoot(), 0);
-		
-//		for (int i = 0; i < toKeys; i++) {
-//			out.println("key = " + i + " value = " + bpt.get(i));
-//		} // for
 	}
 	
 	/**
-	 * the submap with keys in the range [firstKey, toKey)
+	 * the headmap with keys in the range [firstKey, toKey)
 	 */
 	@Test
 	public void headMapTest() {
@@ -84,7 +50,7 @@ public class BpTreeMapTest {
 	}
 	
 	/**
-	 * the submap with keys in the range [fromKey, lastKey]
+	 * the tailmap with keys in the range [fromKey, lastKey]
 	 */
 	@Test
 	public void tailMapTest() {
@@ -99,107 +65,102 @@ public class BpTreeMapTest {
 		assertEquals("subMap", treeMap.subMap(treeMap.firstKey(), treeMap.lastKey()).toString(), bpt.subMap(treeMap.firstKey(), treeMap.lastKey()).toString());
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	/**
+	 * the size (number of keys) in the B+Tree.
+	 */
 	@Test
-	public void sizeTest()
-	{
+	public void sizeTest() {
 		BpTreeMap<Integer, Integer> bptest = new BpTreeMap<>(Integer.class, Integer.class);
 		int totKeys = 12;
-
-		for (int i = 1; i < totKeys; i += 2)
-		{
+		
+		for (int i = 1; i < totKeys; i += 2) {
 			bptest.put(i, i * i);
 		}
 		int TestSize = bptest.size();
-		org.junit.Assert.assertEquals(" The size is ", TestSize, 6);
+		assertEquals(" The size is ", TestSize, 6);
 	}
-
+	
+	/**
+	 * another submap with keys in the range [fromKey, toKey)
+	 */
 	@Test
-	public void subMapTest1()
-	{
+	public void subMapTest1() {
 		BpTreeMap<Integer, Integer> bptest = new BpTreeMap<>(Integer.class, Integer.class);
 		int totKeys = 12;
-
-		for (int i = 1; i < totKeys; i += 2)
-		{
+		
+		for (int i = 1; i < totKeys; i += 2) {
 			bptest.put(i, i * i);
 		}
-
-
+		
 		SortedMap<Integer, Integer> SubMapTest = (SortedMap<Integer, Integer>) bptest.subMap(3, 9);
 		String  st = SubMapTest.toString();
-
-		org.junit.Assert.assertEquals("SubMap Test is ", st, "{3=9, 5=25, 7=49}");
-
+		
+		assertEquals("SubMap Test is ", st, "{3=9, 5=25, 7=49}");
 	}
+	
+	/**
+	 * another headmap with keys in the range [firstKey, toKey)
+	 */
 	@Test
-	public void headMapTest1()
-	{
+	public void headMapTest1() {
 		BpTreeMap<Integer, Integer> bptest = new BpTreeMap<>(Integer.class, Integer.class);
 		int totKeys = 12;
-
-		for (int i = 1; i < totKeys; i += 2)
-		{
+		
+		for (int i = 1; i < totKeys; i += 2) {
 			bptest.put(i, i * i);
 		}
-
-
+		
 		SortedMap<Integer, Integer> HeadTest = (SortedMap<Integer, Integer>) bptest.headMap(5);
 		String  st =HeadTest.toString();
-
+		
 		org.junit.Assert.assertEquals("HeadMap Test is ", st, "{1=1, 3=9}");
 	}
+	
+	/**
+	 * another tailmap with keys in the range [fromKey, lastKey]
+	 */
 	@Test
-	public void tailMapTest1()
-	{
+	public void tailMapTest1() {
 		BpTreeMap<Integer, Integer> bptest = new BpTreeMap<>(Integer.class, Integer.class);
 		int totKeys = 12;
-
-		for (int i = 1; i < totKeys; i += 2)
-		{
+		
+		for (int i = 1; i < totKeys; i += 2) {
 			bptest.put(i, i * i);
 		}
-
-
+		
 		SortedMap<Integer, Integer> TailTest = (SortedMap<Integer, Integer>) bptest.tailMap(5);
 		String  st =TailTest.toString();
-
-		org.junit.Assert.assertEquals("TailMap Test is ", st, "{5=25, 7=49, 9=81, 11=121}");
+		
+		assertEquals("TailMap Test is ", st, "{5=25, 7=49, 9=81, 11=121}");
 	}
+	
+	/**
+	 * the first (smallest) key in the B+Tree map
+	 */
 	@Test
-
-	public void firstKeyTest()
-	{
+	public void firstKeyTest() {
 		BpTreeMap<Integer, Integer> bptest = new BpTreeMap<>(Integer.class, Integer.class);
 		int totKeys = 12;
-
-		for (int i = 1; i < totKeys; i += 2)
-		{
+		
+		for (int i = 1; i < totKeys; i += 2) {
 			bptest.put(i, i * i);
 		}
 		int TestFirst = bptest.firstKey();
-		org.junit.Assert.assertEquals(" First Key is ", TestFirst, 1);
-
+		assertEquals(" First Key is ", TestFirst, 1);
 	}
+	
+	/**
+	 * the last (largest) key in the B+Tree map
+	 */
 	@Test
-	public void lastKeyTest()
-	{
+	public void lastKeyTest() {
 		BpTreeMap<Integer, Integer> bptest = new BpTreeMap<>(Integer.class, Integer.class);
 		int totKeys = 12;
-
-		for (int i = 1; i < totKeys; i += 2)
-		{
+		
+		for (int i = 1; i < totKeys; i += 2) {
 			bptest.put(i, i * i);
 		}
 		int TestLast = bptest.lastKey();
-		org.junit.Assert.assertEquals(" First Key is ", TestLast, 11);
+		assertEquals(" First Key is ", TestLast, 11);
 	}
 }
