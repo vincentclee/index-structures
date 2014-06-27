@@ -344,6 +344,10 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 		
 		System.out.println("ROOT" + Arrays.toString(root.key));
 		System.out.println("ROOT" + Arrays.toString(root.ref));
+		
+		
+//		System.out.println(Arrays.toString(parent.key));
+//		System.out.println(Arrays.toString(parent.ref));
 	}
 	
 	/********************************************************************************
@@ -451,11 +455,8 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 					//split the node n
 					Node right = split(key, ref, node);
 					
-					//push up first key of right to parent node
-					Node parent = null;
-					
-					//get parent
-					parent = stack.pop();
+					//get parent - push up first key of right to parent node
+					Node parent = stack.pop();
 					
 					//not full parent add
 					if (parent.nKeys < ORDER-1) {
@@ -471,7 +472,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 						K middleKey = iSplit(right.key[0], (V) right, parent, rParent);
 						
 						
-						
+						//TODO
 						
 						System.out.println("STACK CONTENTS: " + stack.size());
 						
@@ -488,19 +489,157 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 							
 							return;
 						} else { // not root
-							System.out.println("HI THERE");
-							//TODO need to while loop untill stack is empty or root
+							System.out.println("=STEP ONE");
 							
-//							//need to check
-							parent = stack.pop();
-//							
-//							//link parent to right child
-							wedge(middleKey, (V) rParent, parent, 1);
-							return;
+							//don't need to check, bc parent not root, must be good
+							Node parent1 = stack.pop();
 							
-//							System.out.println(Arrays.toString(rParent.key));
-//							System.out.println(Arrays.toString(rParent.ref));
-//							System.out.println(middleKey);
+							//parent is not full
+							if (parent1.nKeys < ORDER -1) {
+								//link parent to right child
+								wedge(middleKey, (V) rParent, parent1, 1);
+								return;
+							} else { //its full split
+								//split the parent
+								Node rParent1 = new Node(false);
+								K middleKey1 = iSplit(middleKey, (V) rParent, parent1, rParent1);
+								
+								//parent is root
+								if (parent1 == root) {
+									Node newRoot = new Node(false);
+									newRoot.key[0] = middleKey1;
+									newRoot.ref[0] = parent1;
+									newRoot.ref[1] = rParent1;
+									newRoot.nKeys++;
+									
+									//set new root
+									root = newRoot;
+									
+									return;
+								} else { //not root
+									System.out.println("=STEP TWO");
+									
+									//don't need to check, bc parent not root, must be good
+									Node parent2 = stack.pop();
+									
+									//parent is not full
+									if (parent2.nKeys < ORDER -1) {
+										//link parent to right child
+										wedge(middleKey1, (V) rParent1, parent2, 1);
+										return;
+									} else { //its full split
+										//split the parent
+										Node rParent2 = new Node(false);
+										K middleKey2 = iSplit(middleKey1, (V) rParent1, parent2, rParent2);
+										
+										//parent is root
+										if (parent2 == root) {
+											Node newRoot = new Node(false);
+											newRoot.key[0] = middleKey2;
+											newRoot.ref[0] = parent2;
+											newRoot.ref[1] = rParent2;
+											newRoot.nKeys++;
+											
+											//set new root
+											root = newRoot;
+											
+											return;
+										} else { //not root
+											System.out.println("=STEP THREE");
+											
+											//don't need to check, bc parent not root, must be good
+											Node parent3 = stack.pop();
+											
+											//parent is not full
+											if (parent3.nKeys < ORDER -1) {
+												//link parent to right child
+												wedge(middleKey2, (V) rParent2, parent3, 1);
+												return;
+											} else { //its full split
+												//split the parent
+												Node rParent3 = new Node(false);
+												K middleKey3 = iSplit(middleKey2, (V) rParent2, parent3, rParent3);
+												
+												//parent is root
+												if (parent3 == root) {
+													Node newRoot = new Node(false);
+													newRoot.key[0] = middleKey3;
+													newRoot.ref[0] = parent3;
+													newRoot.ref[1] = rParent3;
+													newRoot.nKeys++;
+													
+													//set new root
+													root = newRoot;
+													
+													return;
+												} else { //not root
+													System.out.println("=STEP FOUR");
+													
+													//don't need to check, bc parent not root, must be good
+													Node parent4 = stack.pop();
+													
+													//parent is not full
+													if (parent4.nKeys < ORDER -1) {
+														//link parent to right child
+														wedge(middleKey3, (V) rParent3, parent4, 1);
+														return;
+													} else { //its full split
+														//split the parent
+														Node rParent4 = new Node(false);
+														K middleKey4 = iSplit(middleKey3, (V) rParent3, parent4, rParent4);
+														
+														//parent is root
+														if (parent4 == root) {
+															Node newRoot = new Node(false);
+															newRoot.key[0] = middleKey4;
+															newRoot.ref[0] = parent4;
+															newRoot.ref[1] = rParent4;
+															newRoot.nKeys++;
+															
+															//set new root
+															root = newRoot;
+															
+															return;
+														} else { //not root
+															System.out.println("=STEP FIVE");
+															
+															//don't need to check, bc parent not root, must be good
+															Node parent5 = stack.pop();
+															
+															//parent is not full
+															if (parent5.nKeys < ORDER -1) {
+																//link parent to right child
+																wedge(middleKey4, (V) rParent4, parent5, 1);
+																return;
+															} else { //its full split
+																//split the parent
+																Node rParent5 = new Node(false);
+																K middleKey5 = iSplit(middleKey4, (V) rParent4, parent5, rParent5);
+																
+																//parent is root
+																if (parent5 == root) {
+																	Node newRoot = new Node(false);
+																	newRoot.key[0] = middleKey5;
+																	newRoot.ref[0] = parent5;
+																	newRoot.ref[1] = rParent5;
+																	newRoot.nKeys++;
+																	
+																	//set new root
+																	root = newRoot;
+																	
+																	return;
+																} else { //not root
+																	System.out.println("NOT IMPLEMENTEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
 						}
 					}
 				}
@@ -710,7 +849,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 */
 	public static void main(String [] args) {
 		BpTreeMap<Integer, Integer> bpt = new BpTreeMap<>(Integer.class, Integer.class);
-		int totKeys = 37;
+		int totKeys = 101;
 		if (args.length == 1) {
 			totKeys = Integer.valueOf(args[0]);
 		}
