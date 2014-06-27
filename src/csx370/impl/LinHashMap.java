@@ -101,9 +101,8 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 		classK = _classK;
 		classV = _classV;
 		hTable = new ArrayList<>();
-		for(int i = 0; i < initSize; i++)
-		{
-		  this.hTable.add(new Bucket(null));
+		for (int i = 0; i < initSize; i++) {
+			this.hTable.add(new Bucket(null));
 		}// for
 		mod1 = initSize;
 		mod2 = 2 * mod1;
@@ -114,29 +113,28 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	 * 
 	 * @return the set view of the map
 	 */
-	public Set<Map.Entry<K, V>> entrySet() 
-	{
-	  Set<Map.Entry<K, V>> enSet = new HashSet<>();
-	  
-	  // iterate through hash table to add all pairs
-	  for(int i = 0; i < this.hTable.size(); i++)
-	  {
-	    Bucket bucket = this.hTable.get(i);
-	    
-	    // iterate through the bucket chain at this position in the hash table
-	    while(bucket != null)
-	    {
-	      // iterate through pairs stored in this bucket and place them into the set
-	      for(int j = 0; j < bucket.nKeys; j++)
-	      {
-		enSet.add(new AbstractMap.SimpleEntry<K, V>(bucket.key[j], bucket.value[j]));
-	      }// for
+	public Set<Map.Entry<K, V>> entrySet() {
+		Set<Map.Entry<K, V>> enSet = new HashSet<>();
 
-	      bucket = bucket.next;
-	    }// while
-	  }// for
+		// iterate through hash table to add all pairs
+		for (int i = 0; i < this.hTable.size(); i++) {
+			Bucket bucket = this.hTable.get(i);
 
-	  return enSet;
+			// iterate through the bucket chain at this position in the hash
+			// table
+			while (bucket != null) {
+				// iterate through pairs stored in this bucket and place them
+				// into the set
+				for (int j = 0; j < bucket.nKeys; j++) {
+					enSet.add(new AbstractMap.SimpleEntry<K, V>(bucket.key[j],
+							bucket.value[j]));
+				}// for
+
+				bucket = bucket.next;
+			}// while
+		}// for
+
+		return enSet;
 	} // entrySet
 
 	/********************************************************************************
@@ -146,32 +144,28 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	 *            the key used for look up
 	 * @return the value associated with the key or null if key is not present
 	 */
-	public V get(Object key) 
-	{
-	  // get index of hashtable where desired value is stored
-	  int i = hash(key);
-	  
-	  // look for key in the ith bucket chain
-	  Bucket potentialBucket = this.hTable.get(i);
-	  while(potentialBucket != null)
-	  {
-	    this.count++;
+	public V get(Object key) {
+		// get index of hashtable where desired value is stored
+		int i = hash(key);
 
-	    // iterate through this bucket's key array to check for the key
-	    for(int j = 0; j < LinHashMap.SLOTS; j++)
-	    {
-	      if(key.equals(potentialBucket.key[j]))
-	      {
-		return potentialBucket.value[j];
-	      }// if
-	    }// for
+		// look for key in the ith bucket chain
+		Bucket potentialBucket = this.hTable.get(i);
+		while (potentialBucket != null) {
+			this.count++;
 
-	    // check next bucket in the chain if this one doesn't have the key
-	    potentialBucket = potentialBucket.next;
-	  }// while
+			// iterate through this bucket's key array to check for the key
+			for (int j = 0; j < LinHashMap.SLOTS; j++) {
+				if (key.equals(potentialBucket.key[j])) {
+					return potentialBucket.value[j];
+				}// if
+			}// for
 
-	  // if the key is not found, return null
-	  return null;
+			// check next bucket in the chain if this one doesn't have the key
+			potentialBucket = potentialBucket.next;
+		}// while
+
+		// if the key is not found, return null
+		return null;
 	} // get
 
 	/********************************************************************************
@@ -183,56 +177,52 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	 *            the value to insert
 	 * @return null (not the previous value)
 	 */
-	public V put(K key, V value) 
-	{
-	  // determine index in hashtable where the value needs to be put
-	  int i = hash(key);
-	  this.insert(key, value, i);
-	  this.pairs++;
+	public V put(K key, V value) {
+		// determine index in hashtable where the value needs to be put
+		int i = hash(key);
+		this.insert(key, value, i);
+		this.pairs++;
 
-	  // determine if a bucket needs to be split
-	  if((((float) this.pairs) / this.size()) > LinHashMap.LOAD_FACTOR)
-	  {
-	    // extend hashtable by one
-	    this.hTable.add(new Bucket(null));
+		// determine if a bucket needs to be split
+		if ((((float) this.pairs) / this.size()) > LinHashMap.LOAD_FACTOR) {
+			// extend hashtable by one
+			this.hTable.add(new Bucket(null));
 
-	    // put values from bucket that will be split into temp storage
-	    ArrayList<K> tempKeys = new ArrayList<K>();
-	    ArrayList<V> tempValues = new ArrayList<V>();
-	    Bucket bucketToEmpty = this.hTable.get(split);
-	    while(bucketToEmpty != null)
-	    {
-	      for(int j = 0; j < bucketToEmpty.nKeys; j++)
-	      {
-		tempKeys.add(bucketToEmpty.key[j]);
-		tempValues.add(bucketToEmpty.value[j]);
-	      }// for
+			// put values from bucket that will be split into temp storage
+			ArrayList<K> tempKeys = new ArrayList<K>();
+			ArrayList<V> tempValues = new ArrayList<V>();
+			Bucket bucketToEmpty = this.hTable.get(split);
+			while (bucketToEmpty != null) {
+				for (int j = 0; j < bucketToEmpty.nKeys; j++) {
+					tempKeys.add(bucketToEmpty.key[j]);
+					tempValues.add(bucketToEmpty.value[j]);
+				}// for
 
-	      bucketToEmpty = bucketToEmpty.next;
-	    }// while
-	    
-	    // create new, empty bucket at the index of the bucket to split
-	    this.hTable.set(split, new Bucket(null));
+				bucketToEmpty = bucketToEmpty.next;
+			}// while
 
-	    // increment split here so that the hash method works properly in the next section
-	    this.split++;
+			// create new, empty bucket at the index of the bucket to split
+			this.hTable.set(split, new Bucket(null));
 
-	    // redistribute values from the emptied bucket
-	    for(int j = 0; j < tempKeys.size(); j++)
-	    {
-	      this.insert(tempKeys.get(j), tempValues.get(j), this.hash(tempKeys.get(j)));
-	    }// for
+			// increment split here so that the hash method works properly in
+			// the next section
+			this.split++;
 
-	    // update split and mod values if necessary
-	    if(this.split == this.mod1)
-	    {
-	      this.split = 0;
-	      this.mod1 *= 2;
-	      this.mod2 *= 2;
-	    }// if
-	  }// if
-	  
-	  return null;
+			// redistribute values from the emptied bucket
+			for (int j = 0; j < tempKeys.size(); j++) {
+				this.insert(tempKeys.get(j), tempValues.get(j),
+						this.hash(tempKeys.get(j)));
+			}// for
+
+			// update split and mod values if necessary
+			if (this.split == this.mod1) {
+				this.split = 0;
+				this.mod1 *= 2;
+				this.mod2 *= 2;
+			}// if
+		}// if
+
+		return null;
 	} // put
 
 	/********************************************************************************
@@ -247,81 +237,76 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	/********************************************************************************
 	 * Print the hash table.
 	 */
-	private void print() 
-	{
-	  out.println("Hash Table (Linear Hashing)");
-	  out.println("-------------------------------------------");
-	  out.println("Key\t->\tValue");
-	  
-	  // iterate through entry set and print each entry
-	  Iterator<Map.Entry<K, V>> itr = this.entrySet().iterator();
-	  while(itr.hasNext())
-	  {
-	    Map.Entry<K, V> entry = itr.next();
-	    out.println(entry.getKey() + "\t->\t" + entry.getValue());
-	  }// while
-	  
-	  out.println("-------------------------------------------");
-	} // print
-	
-	/********************************************************************************
-	 * Insert the given key and value into the bucket chain at the given index of
-	 * the hashtable
-	 *
-	 * @param key the key to insert into the bucket
-	 * @param value the value to insert into the bucket
-	 * @param index the index of the bucket chain to insert the key and value into
-	 */
-	private void insert(K key, V value, int index)
-	{
-	  Bucket insertBucket = this.hTable.get(index);
-	  
-	  // look for the first spot and insert it
-	  boolean inserted = false;
-	  while(!inserted)
-	  {
-	    // if this bucket has an empty spot, then insert the goods
-	    if(insertBucket.nKeys < LinHashMap.SLOTS)
-	    {
-	      insertBucket.key[insertBucket.nKeys] = key;
-	      insertBucket.value[insertBucket.nKeys] = value;
-	      insertBucket.nKeys++;
-	      inserted = true;
-	    }// if
-	    // if this bucket is full, then move to the next one
-	    else 
-	    {
-	      // if there is no next bucket, then create it
-	      if(insertBucket.next == null)
-	      {
-		Bucket newBucket = new Bucket(null);
-		insertBucket.next = newBucket;
-	      }// if
+	private void print() {
+		out.println("Hash Table (Linear Hashing)");
+		out.println("-------------------------------------------");
+		out.println("Key\t->\tValue");
 
-	      insertBucket = insertBucket.next;
-	    }// else
-	  }// while
+		// iterate through entry set and print each entry
+		Iterator<Map.Entry<K, V>> itr = this.entrySet().iterator();
+		while (itr.hasNext()) {
+			Map.Entry<K, V> entry = itr.next();
+			out.println(entry.getKey() + "\t->\t" + entry.getValue());
+		}// while
+
+		out.println("-------------------------------------------");
+	} // print
+
+	/********************************************************************************
+	 * Insert the given key and value into the bucket chain at the given index
+	 * of the hashtable
+	 *
+	 * @param key
+	 *            the key to insert into the bucket
+	 * @param value
+	 *            the value to insert into the bucket
+	 * @param index
+	 *            the index of the bucket chain to insert the key and value into
+	 */
+	private void insert(K key, V value, int index) {
+		Bucket insertBucket = this.hTable.get(index);
+
+		// look for the first spot and insert it
+		boolean inserted = false;
+		while (!inserted) {
+			// if this bucket has an empty spot, then insert the goods
+			if (insertBucket.nKeys < LinHashMap.SLOTS) {
+				insertBucket.key[insertBucket.nKeys] = key;
+				insertBucket.value[insertBucket.nKeys] = value;
+				insertBucket.nKeys++;
+				inserted = true;
+			}// if
+				// if this bucket is full, then move to the next one
+			else {
+				// if there is no next bucket, then create it
+				if (insertBucket.next == null) {
+					Bucket newBucket = new Bucket(null);
+					insertBucket.next = newBucket;
+				}// if
+
+				insertBucket = insertBucket.next;
+			}// else
+		}// while
 	}// insert
 
 	/********************************************************************************
-	 * Hash the key into the proper index. This method will determine whether to use
-	 * the high or low resolution hash
+	 * Hash the key into the proper index. This method will determine whether to
+	 * use the high or low resolution hash
 	 *
 	 * @param key
 	 *            the key to hash
 	 * @return the location of the bucket chain containing the key-value pair
 	 */
-	private int hash(Object key)
-	{
-	  int i = h(key);
-	  
-	  // if the current index has already been split, use the higher resolution hash
-	  if(i < split)
-	  {
-	    i = h2(key);
-	  }// if
+	private int hash(Object key) {
+		int i = h(key);
 
-	  return i;
+		// if the current index has already been split, use the higher
+		// resolution hash
+		if (i < split) {
+			i = h2(key);
+		}// if
+
+		return i;
 	}// hash
 
 	/********************************************************************************
@@ -354,19 +339,19 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	 *            insert)
 	 */
 	public static void main(String[] args) {
-	  LinHashMap<Integer, Integer> ht = new LinHashMap<>(Integer.class,
-							     Integer.class, 11);
-	  int nKeys = 30;
-	  if (args.length == 1)
-	    nKeys = Integer.valueOf(args[0]);
-	  for (int i = 0; i < nKeys; i++)
-	    ht.put(i, i * i);
-	  ht.print();
-	  for (int i = 0; i < nKeys; i++) {
-	    out.println("key = " + i + " value = " + ht.get(i));
-	  } // for
-	  out.println("-------------------------------------------");
-	  out.println("Average number of buckets accessed = " + ht.count
-		      / (double) nKeys);
+		LinHashMap<Integer, Integer> ht = new LinHashMap<>(Integer.class,
+				Integer.class, 11);
+		int nKeys = 30;
+		if (args.length == 1)
+			nKeys = Integer.valueOf(args[0]);
+		for (int i = 0; i < nKeys; i++)
+			ht.put(i, i * i);
+		ht.print();
+		for (int i = 0; i < nKeys; i++) {
+			out.println("key = " + i + " value = " + ht.get(i));
+		} // for
+		out.println("-------------------------------------------");
+		out.println("Average number of buckets accessed = " + ht.count
+				/ (double) nKeys);
 	} // main
 } // LinHashMap

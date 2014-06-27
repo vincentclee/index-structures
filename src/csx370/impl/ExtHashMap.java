@@ -56,7 +56,7 @@ public class ExtHashMap<K, V> extends AbstractMap<K, V> implements
 
 	/**
 	 * The directory providing access paths to the buckets (buckets in logical
-	 * oder)
+	 * order)
 	 */
 	private final List<Bucket> dir;
 
@@ -101,7 +101,12 @@ public class ExtHashMap<K, V> extends AbstractMap<K, V> implements
 	public Set<Map.Entry<K, V>> entrySet() {
 		Set<Map.Entry<K, V>> enSet = new HashSet<>();
 
-		// TODO: T O B E I M P L E M E N T E D
+		for (Bucket bucket : hTable) {
+			for (int x = 0; x < bucket.nKeys; x++) {
+				enSet.add(new AbstractMap.SimpleEntry<K, V>(bucket.key[x],
+						bucket.value[x]));
+			}
+		}
 
 		return enSet;
 	} // entrySet
@@ -156,7 +161,20 @@ public class ExtHashMap<K, V> extends AbstractMap<K, V> implements
 		out.println("Hash Table (Extendable Hashing)");
 		out.println("-------------------------------------------");
 
-		// TODO: T O B E I M P L E M E N T E D
+		int bucketCount = 0;
+
+		for (Bucket bucket : hTable) {
+
+			out.println("------------------Bucket #" + bucketCount
+					+ "-----------------");
+
+			for (int x = 0; x < bucket.nKeys; x++) {
+
+				out.print("Item #" + bucketCount);
+				out.println(bucket.value.toString());
+				
+			}
+		}
 
 		out.println("-------------------------------------------");
 	} // print
