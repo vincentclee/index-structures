@@ -119,11 +119,15 @@ public class ExtHashMap<K, V> extends AbstractMap<K, V> implements
 	 * @return the value associated with the key
 	 */
 	public V get(Object key) {
+
 		int i = h(key);
 		Bucket b = dir.get(i);
 
-		// TODO: T O B E I M P L E M E N T E D
-
+		for (int x = 0; x < b.nKeys; x++) {
+			if (b.key[x].equals(key)) {
+				return b.value[x];
+			}
+		}
 		return null;
 	} // get
 
@@ -140,10 +144,50 @@ public class ExtHashMap<K, V> extends AbstractMap<K, V> implements
 		int i = h(key);
 		Bucket b = dir.get(i);
 
-		// TODO: T O B E I M P L E M E N T E D
+		// Determine if bucket is full
+		if (b.nKeys < SLOTS) {
+			insertIntoBucket(b, key, value);
+			
+		// Extendible part of the hash table
+		} else {
+			
+			hTable.add(new Bucket());
+			dir.add(i, new Bucket());
+			mod++;
+			nBuckets++;
+			
+			for (int x = 0; x < SLOTS; x++)  {
+				
+				K tempKey = b.key[x];
+				V tempValue = b.value[x];
+				
+				b.key[x] = null;
+				b.value[x] = null;
+				b.nKeys--;
+				
+				put(tempKey, tempValue);
+				
+			}
+		}
 
 		return null;
 	} // put
+
+	/**
+	 * Adds a value to a non-full bucket
+	 * @param bucket	The bucket to insert into
+	 * @param key		The key to insert
+	 * @param value		The value to insert
+	 * @return			null (not the previous value)
+	 */
+	private V insertIntoBucket(Bucket bucket, K key, V value) {
+		
+		bucket.key[bucket.nKeys] = key;
+		bucket.value[bucket.nKeys] = value;
+		bucket.nKeys++;
+		
+		return null;
+	}
 
 	/********************************************************************************
 	 * Return the size (SLOTS * number of buckets) of the hash table.
@@ -172,7 +216,7 @@ public class ExtHashMap<K, V> extends AbstractMap<K, V> implements
 
 				out.print("Item #" + bucketCount);
 				out.println(bucket.value.toString());
-				
+
 			}
 		}
 
