@@ -143,10 +143,9 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	 *            the key used for look up
 	 * @return the value associated with the key or null if key is not present
 	 */
-	public V get(Object key)
-	{
-	  // call private get method that increments count for performance testing
-	  return this.get(key, true);
+	public V get(Object key) {
+		// call private get method that increments count for performance testing
+		return this.get(key, true);
 	}// get
 
 	/********************************************************************************
@@ -154,7 +153,9 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	 * 
 	 * @param key
 	 *            the key used for look up
-	 * @param updateCount true to update this.count for performance testing, false otherwise
+	 * @param updateCount
+	 *            true to update this.count for performance testing, false
+	 *            otherwise
 	 * @return the value associated with the key or null if key is not present
 	 */
 	private V get(Object key, boolean updateCount) {
@@ -164,11 +165,10 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 		// look for key in the ith bucket chain
 		Bucket potentialBucket = hTable.get(i);
 		while (potentialBucket != null) {
-		        if(updateCount)
-			{
-			  this.count++;
+			if (updateCount) {
+				this.count++;
 			}// if
-			
+
 			// iterate through this bucket's key array to check for the key
 			for (int j = 0; j < SLOTS; j++) {
 				if (key.equals(potentialBucket.key[j])) {
@@ -194,12 +194,11 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	 * @return null (not the previous value)
 	 */
 	public V put(K key, V value) {
-	        // prevent storage of duplicates, don't increment this.count here
-	        if(value == this.get(key, false))
-		{
-		  return null;
+		// prevent storage of duplicates, don't increment this.count here
+		if (value == this.get(key, false)) {
+			return null;
 		}// if
-	    
+
 		// determine index in hashtable where the value needs to be put
 		int i = hash(key);
 		insert(key, value, i);
@@ -356,7 +355,8 @@ public class LinHashMap<K, V> extends AbstractMap<K, V> implements
 	/********************************************************************************
 	 * The main method used for testing.
 	 * 
-	 *          @param args the command-line arguments (args [0] gives number of keys to
+	 * @param args
+	 *            the command-line arguments (args [0] gives number of keys to
 	 *            insert)
 	 */
 	public static void main(String[] args) {
