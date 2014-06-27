@@ -447,85 +447,62 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 				//key is a duplicate
 				if (Arrays.stream(node.key).anyMatch(key::equals)) {
 					wedge(key, ref, node, 0);
-				} else {
+				} else { //not duplicate
 					//split the node n
 					Node right = split(key, ref, node);
 					
 					//push up first key of right to parent node
 					Node parent = null;
 					
-					//needed for double parent fulls
-					Node rParent = null;
-					K middleKey = null;
-					boolean fullParentNonRoot = false;
+					//get parent
+					parent = stack.pop();
 					
-					//up the node stack to Root
-					while (!stack.isEmpty()) {
-						//get parent
-						parent = stack.pop();
+					//not full parent add
+					if (parent.nKeys < ORDER-1) {
+						wedge(right.key[0], (V) right, parent, 1);
+						return;
+					}
+					//full parent split
+					else {
+						System.out.println("Parent is full " + parent.nKeys);
 						
-						//not full parent add
-						if (parent.nKeys < ORDER-1) {
-							if (fullParentNonRoot) {
-								//link parent to right child
-								wedge(middleKey, (V) rParent, parent, 1);
-							} else {
-								//link parent to right child
-								wedge(right.key[0], (V) right, parent, 1);
-							}
+						//split internal node
+						Node rParent = new Node(false);
+						K middleKey = iSplit(right.key[0], (V) right, parent, rParent);
+						
+						
+						
+						
+						System.out.println("STACK CONTENTS: " + stack.size());
+						
+						//root
+						if (parent == root) {
+							Node newRoot = new Node(false);
+							newRoot.key[0] = middleKey;
+							newRoot.ref[0] = parent;
+							newRoot.ref[1] = rParent;
+							newRoot.nKeys++;
+							
+							//set new root
+							root = newRoot;
 							
 							return;
-						}
-						//full parent split
-						else {
-							System.out.println("Parent is full " + parent.nKeys);
+						} else { // not root
+							System.out.println("HI THERE");
+							//TODO need to while loop untill stack is empty or root
 							
+//							//need to check
+							parent = stack.pop();
+//							
+//							//link parent to right child
+							wedge(middleKey, (V) rParent, parent, 1);
+							return;
 							
-							//split internal node
-							rParent = new Node(false);
-							middleKey = iSplit(right.key[0], (V) right, parent, rParent);
-							
-							
-							
-							System.out.println("STACK CONTENTS: " + stack.size());
-							
-							//root
-							if (parent == root) {
-								Node newRoot = new Node(false);
-								newRoot.key[0] = middleKey;
-								newRoot.ref[0] = parent;
-								newRoot.ref[1] = rParent;
-								newRoot.nKeys++;
-								
-								//set new root
-								root = newRoot;
-								
-								return;
-							} else { // not root
-								System.out.println("HI THERE");
-								//TODO need to while loop untill stack is empty or root
-								
-//								//need to check
-//								parent = stack.pop();
-//								
-//								//link parent to right child
-//								wedge(middleKey, (V) rParent, parent, 1);
-//								
-//								System.out.println(Arrays.toString(rParent.key));
-//								System.out.println(Arrays.toString(rParent.ref));
-//								System.out.println(middleKey);
-//								stack.clear();
-								fullParentNonRoot = true;
-							}
+//							System.out.println(Arrays.toString(rParent.key));
+//							System.out.println(Arrays.toString(rParent.ref));
+//							System.out.println(middleKey);
 						}
 					}
-					
-					
-					
-					
-					
-					
-					
 				}
 			}
 		}
@@ -561,7 +538,9 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 				i = -1;
 			}
 		}
-		System.out.println("ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
+		
+		System.out.println("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
+		
 		//not really possible
 		return null;
 	} // locate
@@ -625,9 +604,6 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 		//Add key and ref to add
 		sortedMap.put(key, ref);
 		
-		System.out.println(sortedMap);
-		
-		
 		//clean array - a, fromIndex, toIndex, val
 		Arrays.fill(left.key, 0, ORDER - 1, null);
 		Arrays.fill(left.ref, 1, ORDER, null);
@@ -649,70 +625,11 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 		System.out.println("right" + Arrays.toString(right.ref));
 		System.out.println(right.nKeys);
 		
-		
-		
-
-		
-		
-		
-		
 		System.out.println("MIDDLER: " + (K) sortedMap.keySet().toArray()[MIDDLE -1]);
 		
 		
 		//DO NOT TOUCH
 		return (K) sortedMap.keySet().toArray()[MIDDLE -1];
-		//DO NOT TOUCH
-		
-//		/*
-//		 * Fill with null to 'n'
-//		 * a, fromIndex, toIndex, val
-//		 * [3, 5, null, null]
-//		 * [9, 25, null, null, null]
-//		 */
-//		Arrays.fill(n.key, HALF, ORDER - 1, null);
-//		Arrays.fill(n.ref, HALF, ORDER - 1, null);
-//		
-//		/*
-//		 * Copy over first half to 'n'
-//		 * src, srcPos, dest, destPos, length
-//		 * [1, 3, null, null]
-//		 * [1, 9, null, null, null]
-//		 */
-//		System.arraycopy(sortedMap.keySet().toArray(), 0, n.key, 0, HALF);
-//		System.arraycopy(sortedMap.values().toArray(), 0, n.ref, 0, HALF);
-//		n.nKeys = HALF; //set n.nKeys
-//		
-//		/*
-//		 * Copy over rest to 'right'
-//		 * src, srcPos, dest, destPos, length
-//		 * [5, 7, 9, null]
-//		 * [25, 49, 81, null, null]
-//		 */
-//		System.arraycopy(sortedMap.keySet().toArray(), HALF, right.key, 0, ORDER-HALF);
-//		System.arraycopy(sortedMap.values().toArray(), HALF, right.ref, 0, ORDER-HALF);
-//		right.nKeys = ORDER-HALF; //set right.nKeys
-//		
-//		//link n to right
-//		if (n.isLeaf && right.isLeaf) {
-//			System.out.println("both are leaf");
-//			//right -> (n.next)
-//			right.ref[ORDER - 1] = n.ref[ORDER - 1];
-//			
-//			//n -> right
-//			n.ref[ORDER - 1] = right;
-//			
-//		}
-//		
-//		System.out.println(n);
-//		System.out.println("n" + Arrays.toString(n.key));
-//		System.out.println("n" + Arrays.toString(n.ref));
-//		System.out.println(n.nKeys);
-//		System.out.println(right);
-//		System.out.println("right" + Arrays.toString(right.key));
-//		System.out.println("right" + Arrays.toString(right.ref));
-//		System.out.println(right.nKeys);
-		
-//		return null;
 	} // split
 	
 	/********************************************************************************
@@ -721,6 +638,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 * @param ref  the value/node to insert
 	 * @param n    the current node
 	 */
+	@SuppressWarnings("unchecked")
 	private Node split(K key, V ref, Node n) {
 		/*
 		 * Node n START
@@ -783,15 +701,6 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 			
 		}
 		
-//		System.out.println(n);
-//		System.out.println("n" + Arrays.toString(n.key));
-//		System.out.println("n" + Arrays.toString(n.ref));
-//		System.out.println(n.nKeys);
-//		System.out.println(right);
-//		System.out.println("right" + Arrays.toString(right.key));
-//		System.out.println("right" + Arrays.toString(right.ref));
-//		System.out.println(right.nKeys);
-		
 		return right;
 	} // split
 	
@@ -801,45 +710,45 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 */
 	public static void main(String [] args) {
 		BpTreeMap<Integer, Integer> bpt = new BpTreeMap<>(Integer.class, Integer.class);
-		int totKeys = 10;
+		int totKeys = 37;
 		if (args.length == 1) {
 			totKeys = Integer.valueOf(args[0]);
 		}
 		
-//		for (int i = 1; i < totKeys; i += 2) {
-//			bpt.put(i, i * i);
-//		}
+		for (int i = 1; i < totKeys; i++) {
+			bpt.put(i, i * i);
+		}
 		
-		bpt.put(3, 9);
-		bpt.put(7, 49);
-		bpt.put(9, 81);
-		bpt.put(5, 25);
-		bpt.put(1, 1);
-		bpt.put(11, 121);
-		bpt.put(13, 169);
-		bpt.put(2, 4);
-		bpt.put(0, 0);
-		bpt.put(8, 64);
-		bpt.put(6, 36);
-		bpt.put(10, 100);
-		bpt.put(4, 16);
-		bpt.put(14, 1414);
-		bpt.put(12, 1212);
-		bpt.put(15, 1515);
-		bpt.put(16, 1616);
-		bpt.put(19, 1919);
-		bpt.put(21, 2121);
-		bpt.put(20, 2020);
-		bpt.put(20, 2021);
-		bpt.put(23, 2323);
-		bpt.put(22, 2222);
-		bpt.put(24, 2424);
-		bpt.put(25, 2525);
+//		bpt.put(3, 9);
+//		bpt.put(7, 49);
+//		bpt.put(9, 81);
+//		bpt.put(5, 25);
+//		bpt.put(1, 1);
+//		bpt.put(11, 121);
+//		bpt.put(13, 169);
+//		bpt.put(2, 4);
+//		bpt.put(0, 0);
+//		bpt.put(8, 64);
+//		bpt.put(6, 36);
+//		bpt.put(10, 100);
+//		bpt.put(4, 16);
+//		bpt.put(14, 1414);
+//		bpt.put(12, 1212);
+//		bpt.put(15, 1515);
+//		bpt.put(16, 1616);
+//		bpt.put(19, 1919);
+//		bpt.put(21, 2121);
+//		bpt.put(20, 2020);
+//		bpt.put(20, 2021);
+//		bpt.put(23, 2323);
+//		bpt.put(22, 2222);
+//		bpt.put(24, 2424);
+//		bpt.put(25, 2525);
 		
 		bpt.debug();
 		bpt.print(bpt.root, 0);
 		
-		for (int i = 0; i < 30; i++) {
+		for (int i = 0; i < 50; i++) {
 			Integer value = bpt.get(i);
 			if (value != null)
 				out.println("key = " + i + " value = " + value);
