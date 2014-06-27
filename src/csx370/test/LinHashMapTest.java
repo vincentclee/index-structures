@@ -3,6 +3,9 @@ package csx370.test;
 import junit.framework.TestCase;
 import csx370.impl.LinHashMap;
 
+/**
+ * This class provides tests for the Index Structure: Linear Hashing
+ */
 public class LinHashMapTest extends TestCase 
 {
   LinHashMap<Integer, Integer> lhm;

@@ -78,9 +78,9 @@ public class ExtHashMap<K, V> extends AbstractMap<K, V> implements
 	/********************************************************************************
 	 * Construct a hash table that uses Extendable Hashing.
 	 * 
-	 * @param classK
+	 * @param _classK
 	 *            the class for keys (K)
-	 * @param classV
+	 * @param _classV
 	 *            the class for keys (V)
 	 * @param initSize
 	 *            the initial number of buckets (a power of 2, e.g., 4)
@@ -237,7 +237,7 @@ public class ExtHashMap<K, V> extends AbstractMap<K, V> implements
 	/********************************************************************************
 	 * The main method used for testing.
 	 * 
-	 * @param the
+	 * @param args the
 	 *            command-line arguments (args [0] gives number of keys to
 	 *            insert)
 	 */

@@ -238,7 +238,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	} // lastKey
 	
 	/********************************************************************************
-	 * Return the portion of the B+Tree map where key < toKey.
+	 * Return the portion of the B+Tree map where key {@literal <} toKey.
 	 * @return  the submap with keys in the range [firstKey, toKey)
 	 */
 	public SortedMap<K,V> headMap(K toKey) {
@@ -246,7 +246,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	} // headMap
 	
 	/********************************************************************************
-	 * Return the portion of the B+Tree map where fromKey <= key.
+	 * Return the portion of the B+Tree map where fromKey {@literal <}= key.
 	 * @return  the submap with keys in the range [fromKey, lastKey]
 	 */
 	@SuppressWarnings("unchecked")
@@ -279,7 +279,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	
 	/********************************************************************************
 	 * Return the portion of the B+Tree map whose keys are between fromKey and toKey,
-	 * i.e., fromKey <= key < toKey.
+	 * i.e., fromKey {@literal <}= key {@literal <} toKey.
 	 * @return  the submap with keys in the range [fromKey, toKey)
 	 */
 	@SuppressWarnings("unchecked")
@@ -390,7 +390,8 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	/********************************************************************************
 	 * Recursive helper function for finding a key in B+trees.
 	 * @param key  the key to find
-	 * @param ney  the current node
+	 * @param n  the current node
+	 * @return value
 	 */
 	@SuppressWarnings({ "unchecked", "unused" })
 	private V find(K key, Node n) {
@@ -652,9 +653,8 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	/********************************************************************************
 	 * Non-Recursive helper function for locating tuple where insertion will occur
 	 * @param key  the key to insert
-	 * @param ref  the value/node to insert
-	 * @param n    the current node
-	 * @param p    the parent node
+	 * @param stack    trace to root
+	 * @return located node
 	 */
 	@SuppressWarnings("unchecked")
 	private Node locate(K key, Stack<Node> stack) {
@@ -732,6 +732,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 * @param ref  the value/node to insert
 	 * @param left    the current node
 	 * @param right    the newer node
+	 * @return key
 	 */
 	@SuppressWarnings("unchecked")
 	private K iSplit(K key, V ref, Node left, Node right) {
@@ -769,6 +770,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	 * @param key  the key to insert
 	 * @param ref  the value/node to insert
 	 * @param n    the current node
+	 * @return right split node
 	 */
 	@SuppressWarnings("unchecked")
 	private Node split(K key, V ref, Node n) {
@@ -838,7 +840,7 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	
 	/********************************************************************************
 	 * The main method used for testing.
-	 * @param  the command-line arguments (args [0] gives number of keys to insert)
+	 * @param args  the command-line arguments (args [0] gives number of keys to insert)
 	 */
 	public static void main(String [] args) {
 		BpTreeMap<Integer, Integer> bpt = new BpTreeMap<>(Integer.class, Integer.class);

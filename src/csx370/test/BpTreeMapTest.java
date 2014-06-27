@@ -12,7 +12,7 @@ import org.junit.Test;
 import csx370.impl.BpTreeMap;
 
 /**
- * This class provides tests for the B+ Tree data stricture
+ * This class provides tests for the Index Structure: B+ Tree
  */
 public class BpTreeMapTest {
 	private BpTreeMap<Integer, Integer> bpt;
