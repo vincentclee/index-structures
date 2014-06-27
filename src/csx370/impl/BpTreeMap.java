@@ -454,6 +454,11 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 					//push up first key of right to parent node
 					Node parent = null;
 					
+					//needed for double parent fulls
+					Node rParent = null;
+					K middleKey = null;
+					boolean fullParentNonRoot = false;
+					
 					//up the node stack to Root
 					while (!stack.isEmpty()) {
 						//get parent
@@ -461,23 +466,26 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 						
 						//not full parent add
 						if (parent.nKeys < ORDER-1) {
-							//link parent to right child
-							wedge(right.key[0], (V) right, parent, 1);
+							if (fullParentNonRoot) {
+								//link parent to right child
+								wedge(middleKey, (V) rParent, parent, 1);
+							} else {
+								//link parent to right child
+								wedge(right.key[0], (V) right, parent, 1);
+							}
+							
 							return;
-//							System.out.println("tried to wedge");
-//							System.out.println(Arrays.toString(right.key));
-//							System.out.println(Arrays.toString(right.ref));
-//							System.out.println(Arrays.toString(parent.key));
-//							System.out.println(Arrays.toString(parent.ref));
-//							System.out.println("tried to wedge");
 						}
 						//full parent split
 						else {
 							System.out.println("Parent is full " + parent.nKeys);
 							
+							
 							//split internal node
-							Node rParent = new Node(false);
-							K middleKey = iSplit(right.key[0], (V) right, parent, rParent);
+							rParent = new Node(false);
+							middleKey = iSplit(right.key[0], (V) right, parent, rParent);
+							
+							
 							
 							System.out.println("STACK CONTENTS: " + stack.size());
 							
@@ -491,20 +499,23 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 								
 								//set new root
 								root = newRoot;
+								
+								return;
 							} else { // not root
 								System.out.println("HI THERE");
 								//TODO need to while loop untill stack is empty or root
 								
-								//need to check
-								parent = stack.pop();
-								
-								//link parent to right child
-								wedge(middleKey, (V) rParent, parent, 1);
-								
-								System.out.println(Arrays.toString(rParent.key));
-								System.out.println(Arrays.toString(rParent.ref));
-								System.out.println(middleKey);
-								stack.clear();
+//								//need to check
+//								parent = stack.pop();
+//								
+//								//link parent to right child
+//								wedge(middleKey, (V) rParent, parent, 1);
+//								
+//								System.out.println(Arrays.toString(rParent.key));
+//								System.out.println(Arrays.toString(rParent.ref));
+//								System.out.println(middleKey);
+//								stack.clear();
+								fullParentNonRoot = true;
 							}
 						}
 					}
@@ -822,6 +833,8 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 		bpt.put(20, 2021);
 		bpt.put(23, 2323);
 		bpt.put(22, 2222);
+		bpt.put(24, 2424);
+		bpt.put(25, 2525);
 		
 		bpt.debug();
 		bpt.print(bpt.root, 0);
