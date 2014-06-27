@@ -1,5 +1,5 @@
 /**
- * 
+ * hi
  */
 package csx370.test;
 
@@ -23,7 +23,7 @@ import csx370.impl.BpTreeMap;
  */
 public class BpTreeMapTest {
 	BpTreeMap<Integer, Integer> bpt;
-	Map<Integer,Integer> linkedHashMap;
+//	Map<Integer,Integer> linkedHashMap;
 	SortedMap<Integer,Integer> treeMap;
 	
 	/**
@@ -32,25 +32,26 @@ public class BpTreeMapTest {
 	@Before
 	public void setUp() {
 		bpt = new BpTreeMap<>(Integer.class, Integer.class);
-		int toKeys = 9;
+		int toKeys = 20;
 		
 		Random random = new Random();
 		
 		
-		linkedHashMap = new LinkedHashMap<Integer,Integer>();
+//		linkedHashMap = new LinkedHashMap<Integer,Integer>();
 		treeMap = new TreeMap<Integer,Integer>();
 		
 		
-//		for (int i = 0; i < toKeys; i++) {
-//			int number = random.nextInt(20);
-//			
-//			//generate unique 5 digit number
+		for (int i = 0; i < toKeys; i++) {
+			int number = random.nextInt(20);
+			
+			//generate unique 5 digit number
 //			while (linkedHashMap.containsKey(number = random.nextInt(20)));
-//			
+			
 //			linkedHashMap.put(number, number * number);
-//			treeMap.put(number, number * number);
-//		}
-		
+			treeMap.put(number, number * number);
+			bpt.put(number, number * number);
+		}
+//		
 //		System.out.println(linkedHashMap);
 		
 		
@@ -60,10 +61,10 @@ public class BpTreeMapTest {
 //		    
 //		    bpt.put(key, value);
 //		}
-		for (int i = 1; i < toKeys; i += 2) {
-			bpt.put(i, i * i);
-			treeMap.put(i, i * i);
-		}
+//		for (int i = 1; i < toKeys; i += 2) {
+//			bpt.put(i, i * i);
+//			treeMap.put(i, i * i);
+//		}
 		
 		System.out.println(treeMap);
 		
