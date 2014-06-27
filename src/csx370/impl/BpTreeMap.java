@@ -337,9 +337,9 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 	} // size
 	
 	private void debug() {
-		System.out.println("first:" + firstKey()); //TODO
-		System.out.println("last:" + lastKey()); //TODO
-		System.out.println("size:" + size()); //TODO
+		System.out.println("first:" + firstKey());
+		System.out.println("last:" + lastKey());
+		System.out.println("size:" + size());
 		System.out.println("entry:" + entrySet());
 		
 		System.out.println("ROOT" + Arrays.toString(root.key));
@@ -452,49 +452,68 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 					Node right = split(key, ref, node);
 					
 					//push up first key of right to parent node
-					Node parent = stack.pop();
+					Node parent = null;
 					
-					//full parent split
-					if (parent.nKeys == ORDER-1) {
-						System.out.println("Parent is full " + parent.nKeys);
+					//up the node stack to Root
+					while (!stack.isEmpty()) {
+						//get parent
+						parent = stack.pop();
 						
-						//split internal node
-						Node rParent = new Node(false);
-						K middleKey = iSplit(right.key[0], (V) right, parent, rParent);
-						
-						
-						
-						System.out.println("STACK CONTENTS: " + stack.size());
-						
-						//root
-						if (stack.isEmpty()) {
-							Node newRoot = new Node(false);
-							newRoot.key[0] = middleKey;
-							newRoot.ref[0] = parent;
-							newRoot.ref[1] = rParent;
-							newRoot.nKeys++;
-							
-							//set new root
-							root = newRoot;
-						} else {
-							System.out.println("HI THERE");
+						//not full parent add
+						if (parent.nKeys < ORDER-1) {
+							//link parent to right child
+							wedge(right.key[0], (V) right, parent, 1);
+							return;
+//							System.out.println("tried to wedge");
+//							System.out.println(Arrays.toString(right.key));
+//							System.out.println(Arrays.toString(right.ref));
+//							System.out.println(Arrays.toString(parent.key));
+//							System.out.println(Arrays.toString(parent.ref));
+//							System.out.println("tried to wedge");
 						}
-						
-						
-						
-						
-					} 
-					//not full parent split
-					else {
-						//link parent to right child
-						wedge(right.key[0], (V) right, parent, 1);
-						System.out.println("tried to wedge");
-						System.out.println(Arrays.toString(right.key));
-						System.out.println(Arrays.toString(right.ref));
-						System.out.println(Arrays.toString(parent.key));
-						System.out.println(Arrays.toString(parent.ref));
-						System.out.println("tried to wedge");
+						//full parent split
+						else {
+							System.out.println("Parent is full " + parent.nKeys);
+							
+							//split internal node
+							Node rParent = new Node(false);
+							K middleKey = iSplit(right.key[0], (V) right, parent, rParent);
+							
+							System.out.println("STACK CONTENTS: " + stack.size());
+							
+							//root
+							if (parent == root) {
+								Node newRoot = new Node(false);
+								newRoot.key[0] = middleKey;
+								newRoot.ref[0] = parent;
+								newRoot.ref[1] = rParent;
+								newRoot.nKeys++;
+								
+								//set new root
+								root = newRoot;
+							} else { // not root
+								System.out.println("HI THERE");
+								//TODO need to while loop untill stack is empty or root
+								
+								//need to check
+								parent = stack.pop();
+								
+								//link parent to right child
+								wedge(middleKey, (V) rParent, parent, 1);
+								
+								System.out.println(Arrays.toString(rParent.key));
+								System.out.println(Arrays.toString(rParent.ref));
+								System.out.println(middleKey);
+								stack.clear();
+							}
+						}
 					}
+					
+					
+					
+					
+					
+					
 					
 				}
 			}
@@ -801,6 +820,8 @@ public class BpTreeMap<K extends Comparable<K>, V> extends AbstractMap<K, V>
 		bpt.put(21, 2121);
 		bpt.put(20, 2020);
 		bpt.put(20, 2021);
+		bpt.put(23, 2323);
+		bpt.put(22, 2222);
 		
 		bpt.debug();
 		bpt.print(bpt.root, 0);
