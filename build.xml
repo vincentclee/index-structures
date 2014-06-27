@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="javadoc" name="index-structures">
+<project basedir="." default="structures" name="index-structures">
 	<property name="junit.output.dir" value="junit"/>
 		<path id="JUnit4.libraryclasspath">
 			<pathelement location="lib/junit-4.11.jar"/>
