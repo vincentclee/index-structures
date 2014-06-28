@@ -1,7 +1,12 @@
 package csx370.test;
 
+import static org.junit.Assert.*;
+
 import java.util.Map.Entry;
 import java.util.Set;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import csx370.impl.ExtHashMap;
 import junit.framework.TestCase;
@@ -9,7 +14,7 @@ import junit.framework.TestCase;
 /**
  * Basic testing framework for an ExtHashMap
  */
-public class ExtHashMapTest extends TestCase {
+public class ExtHashMapTest {
 
 	ExtHashMap<Integer, Integer> testMap;
 	
@@ -17,6 +22,7 @@ public class ExtHashMapTest extends TestCase {
 	 * Sets up the testing state for the exthashmap
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Before
 	public void setUp() {
 		testMap = new ExtHashMap(Integer.class, Integer.class, 4);
 	}
@@ -24,6 +30,7 @@ public class ExtHashMapTest extends TestCase {
 	/**
 	 * Verifies basic get and put operations of the hash set.
 	 */
+	@Test
 	public void putAndGetTest() {
 		testMap.put(5, 10);
 		testMap.put(10, 20);
@@ -38,6 +45,7 @@ public class ExtHashMapTest extends TestCase {
 	/**
 	 * Basic verification that the set provided by the entrySet method is of the same size as the number of elements passed in.
 	 */
+	@Test
 	public void entrySetTest() {
 		putAndGetTest();
 		
