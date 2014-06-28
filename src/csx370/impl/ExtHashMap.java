@@ -91,6 +91,15 @@ public class ExtHashMap<K, V> extends AbstractMap<K, V> implements
 		hTable = new ArrayList<>(); // for bucket storage
 		dir = new ArrayList<>(); // for bucket access
 		mod = nBuckets = initSize;
+		
+		for (int x = 0; x < nBuckets; x++) {
+			
+			Bucket basicBucket = new Bucket();
+			
+			hTable.add(basicBucket);
+			dir.add(basicBucket);
+			
+		}
 	} // constructor
 
 	/********************************************************************************
@@ -182,6 +191,8 @@ public class ExtHashMap<K, V> extends AbstractMap<K, V> implements
 	 */
 	private V insertIntoBucket(Bucket bucket, K key, V value) {
 		
+		count++;
+		
 		bucket.key[bucket.nKeys] = key;
 		bucket.value[bucket.nKeys] = value;
 		bucket.nKeys++;
@@ -214,10 +225,12 @@ public class ExtHashMap<K, V> extends AbstractMap<K, V> implements
 
 			for (int x = 0; x < bucket.nKeys; x++) {
 
-				out.print("Item #" + bucketCount);
+				out.print("Item #" + bucketCount + ": ");
 				out.println(bucket.value.toString());
 
 			}
+			
+			bucketCount++;
 		}
 
 		out.println("-------------------------------------------");

@@ -16,6 +16,7 @@ public class ExtHashMapTest extends TestCase {
 	/**
 	 * Sets up the testing state for the exthashmap
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void setUp() {
 		testMap = new ExtHashMap(Integer.class, Integer.class, 4);
 	}
