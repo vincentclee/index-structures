@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import csx370.impl.ExtHashMap;
-import junit.framework.TestCase;
 
 /**
  * Basic testing framework for an ExtHashMap

@@ -150,6 +150,9 @@ public class ExtHashMap<K, V> extends AbstractMap<K, V> implements
 	 * @return null (not the previous value)
 	 */
 	public V put(K key, V value) {
+		if (key == null) {
+			return null;
+		}
 		int i = h(key);
 		Bucket b = dir.get(i);
 
